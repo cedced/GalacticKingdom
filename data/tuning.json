@@ -31,6 +31,9 @@
     "port_probability_by_tier": [0.9, 0.75, 0.6, 0.5, 0.4, 0.35, 0.3],
     "system_radius": 40.0
   },
+  "warp": {
+    "gate_radius": 6.0
+  },
   "render": {
     "pitch_deg": 30.0,
     "yaw_deg": 45.0,

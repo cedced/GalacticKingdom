@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "galactickingdom/shard.schema.json",
+  "title": "Shard configuration",
+  "description": "One running world (wiki/Architecture.md). Gameplay code reads these values and never branches on the mode name (CLAUDE.md Section 5: shard config, not code).",
+  "type": "object",
+  "required": ["mode", "seed", "fuel_start", "fuel_cap", "fuel_per_minute", "jump_cost", "npc_density", "paradise_count", "medal_ranks"],
+  "additionalProperties": false,
+  "properties": {
+    "mode": { "enum": ["rebang", "permaverse"], "description": "Rebang resets on reset_schedule and awards medals; permaverse never resets." },
+    "seed": { "type": "integer", "description": "Galaxy seed. The whole shard's map derives from this." },
+    "fuel_start": { "type": "number", "minimum": 0, "description": "Warp fuel a new character starts with." },
+    "fuel_cap": { "type": "number", "exclusiveMinimum": 0, "description": "Warp fuel stops accruing here." },
+    "fuel_per_minute": { "type": "number", "minimum": 0, "description": "Real-time accrual rate, online or offline (computed lazily from timestamps)." },
+    "jump_cost": { "type": "number", "minimum": 0, "description": "Warp fuel consumed per gate jump." },
+    "npc_density": { "type": "number", "minimum": 0, "description": "Multiplier on NPC spawns (read from M3 on)." },
+    "paradise_count": { "type": "integer", "minimum": 0, "description": "Paradise worlds per shard (placed at M4)." },
+    "medal_ranks": { "type": "integer", "minimum": 0, "description": "How many top experience ranks earn a medal at a rebang reset." },
+    "reset_schedule": { "type": "string", "description": "Rebang only: when the shard resets. Format decided when resets are implemented (M6 hardening)." }
+  }
+}

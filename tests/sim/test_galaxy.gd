@@ -138,6 +138,34 @@ func test_shortest_path_walks_lanes() -> void:
 		assert_has(galaxy.neighbors(path[i]), path[i + 1], "path hops a missing lane")
 
 
+func test_jump_denial_reasons() -> void:
+	var galaxy: GalaxyData = Galaxy.generate(7, _params())
+	var home_id: int = galaxy.home_system_id
+	var neighbor_id: int = galaxy.neighbors(home_id)[0]
+	var gate: WarpGate = galaxy.system(home_id).gate_to(neighbor_id)
+	var stranger_id: int = -1
+	for system: StarSystem in galaxy.systems:
+		if system.id != home_id and not galaxy.neighbors(home_id).has(system.id):
+			stranger_id = system.id
+			break
+	assert_eq(
+		Galaxy.jump_denial(galaxy, home_id, gate.position, neighbor_id, 10.0, 5.0, 6.0), "",
+		"a fueled ship at the gate must be allowed through"
+	)
+	assert_eq(
+		Galaxy.jump_denial(galaxy, home_id, gate.position, stranger_id, 10.0, 5.0, 6.0),
+		"no lane to that system"
+	)
+	assert_eq(
+		Galaxy.jump_denial(galaxy, home_id, Vector2.ZERO, neighbor_id, 10.0, 5.0, 6.0),
+		"too far from the gate"
+	)
+	assert_eq(
+		Galaxy.jump_denial(galaxy, home_id, gate.position, neighbor_id, 4.9, 5.0, 6.0),
+		"not enough warp fuel"
+	)
+
+
 func test_fuel_accrues_and_caps() -> void:
 	assert_almost_eq(Galaxy.accrued_fuel(10.0, 50.0, 6.0, 60.0), 16.0, 0.0001)
 	assert_eq(Galaxy.accrued_fuel(10.0, 50.0, 6.0, 36000.0), 50.0)

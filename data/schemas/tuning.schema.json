@@ -4,7 +4,7 @@
   "title": "Gameplay tunables",
   "description": "All magic numbers used by gameplay code (CLAUDE.md Section 6). Loaded through sim/tuning.gd and read with dotted paths, e.g. Tuning.value(\"net.tick_hz\").",
   "type": "object",
-  "required": ["net", "render", "autopilot", "world", "galaxy"],
+  "required": ["net", "render", "autopilot", "world", "galaxy", "warp"],
   "additionalProperties": false,
   "properties": {
     "autopilot": {
@@ -48,6 +48,14 @@
           "description": "Chance of a trade port per system, indexed by danger tier (clamped to the last entry)."
         },
         "system_radius": { "type": "number", "exclusiveMinimum": 0, "description": "Gameplay-space radius of a system; warp gates sit on this ring." }
+      }
+    },
+    "warp": {
+      "type": "object",
+      "required": ["gate_radius"],
+      "additionalProperties": false,
+      "properties": {
+        "gate_radius": { "type": "number", "exclusiveMinimum": 0, "description": "How close a ship must be to a warp gate for the jump to be accepted." }
       }
     },
     "net": {

@@ -140,9 +140,9 @@ func _on_server_disconnected() -> void:
 	_views.clear()
 
 
-func _on_welcomed(entity_id: int) -> void:
-	_my_entity_id = entity_id
-	Log.info("net", "welcomed", {"entity_id": entity_id})
+func _on_welcomed(payload: Dictionary) -> void:
+	_my_entity_id = int(payload["entity_id"])
+	Log.info("net", "welcomed", {"entity_id": _my_entity_id})
 
 
 func _on_snapshot_received(_tick_num: int, ships: Dictionary) -> void:

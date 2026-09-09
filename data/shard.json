@@ -1,0 +1,11 @@
+{
+  "mode": "permaverse",
+  "seed": 20260909,
+  "fuel_start": 30.0,
+  "fuel_cap": 100.0,
+  "fuel_per_minute": 2.0,
+  "jump_cost": 5.0,
+  "npc_density": 1.0,
+  "paradise_count": 3,
+  "medal_ranks": 10
+}

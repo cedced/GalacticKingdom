@@ -7,6 +7,7 @@ Exit code 0 when everything validates, 1 otherwise. Run by CI on every push
 
 Conventions:
 - data/tuning.json          -> data/schemas/tuning.schema.json
+- data/shard.json           -> data/schemas/shard.schema.json
 - data/ships/<id>.json      -> data/schemas/ship.schema.json (id must match filename)
 """
 
@@ -98,6 +99,8 @@ def main() -> int:
     count = 1
     validate(DATA_DIR / "tuning.json", SCHEMAS_DIR / "tuning.schema.json", errors)
     validate_tuning_cross_fields(errors)
+    count += 1
+    validate(DATA_DIR / "shard.json", SCHEMAS_DIR / "shard.schema.json", errors)
     count += validate_ships(errors)
     if errors:
         for line in errors:

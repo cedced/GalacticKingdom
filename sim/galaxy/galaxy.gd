@@ -29,6 +29,31 @@ static func generate(galaxy_seed: int, params: GalaxyParams) -> GalaxyData:
 	return galaxy
 
 
+## "" when the jump is allowed, otherwise the denial reason shown to the
+## player. The server is the only caller that matters (ADR-002); the client
+## may call it for a pre-flight UI hint but never trusts its own answer.
+static func jump_denial(
+	galaxy: GalaxyData,
+	from_system_id: int,
+	ship_position: Vector2,
+	to_system_id: int,
+	fuel: float,
+	jump_cost: float,
+	gate_radius: float,
+) -> String:
+	var from_sys: StarSystem = galaxy.system(from_system_id)
+	if from_sys == null:
+		return "unknown system"
+	var gate: WarpGate = from_sys.gate_to(to_system_id)
+	if gate == null:
+		return "no lane to that system"
+	if ship_position.distance_to(gate.position) > gate_radius:
+		return "too far from the gate"
+	if fuel < jump_cost:
+		return "not enough warp fuel"
+	return ""
+
+
 ## Warp fuel accrues in real time, online or not; recomputed lazily from a
 ## timestamp, never ticked (CLAUDE.md Section 5: offline accrual).
 static func accrued_fuel(
