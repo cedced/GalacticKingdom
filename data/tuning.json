@@ -18,7 +18,7 @@
   },
   "world": {
     "starter_hull_id": "merchant_mk1",
-    "spawn_ring_radius": 4.0
+    "spawn_ring_radius": 9.0
   },
   "galaxy": {
     "system_count": 400,
