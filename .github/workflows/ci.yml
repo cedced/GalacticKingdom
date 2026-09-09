@@ -1,0 +1,56 @@
+# CI per CLAUDE.md Section 2: lint, schema validation, tests, headless boot.
+# Failing CI blocks merge.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+env:
+  GODOT_VERSION: "4.7.1"
+
+jobs:
+  validate-data:
+    name: Data schema validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install jsonschema
+      - run: python tools/validate_data.py
+
+  lint:
+    name: GDScript lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install "gdtoolkit==4.*"
+      - run: gdlint sim server client tests
+
+  test:
+    name: Unit tests + headless boot
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot ${{ env.GODOT_VERSION }}
+        run: |
+          curl -sSLo godot.zip \
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          sudo mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
+      - name: Import project
+        run: godot --headless --path . --import
+      - name: Run GUT tests
+        run: godot --headless --path . -s addons/gut/gut_cmdln.gd -gexit
+      - name: Headless server boots
+        run: |
+          godot --headless --path . --main-scene res://server/main.tscn --quit-after 60 | tee server_boot.log
+          grep -q "\[INFO\]\[server\] listening" server_boot.log
+
+  # TODO(M1): headless export job. Needs export templates (~1 GB download) and
+  # an export_presets.cfg; deferred until there is a build worth exporting.

@@ -1,0 +1,37 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://client/main.gd" id="1"]
+[ext_resource type="Script" path="res://client/rendering/iso_camera.gd" id="2"]
+[ext_resource type="Shader" path="res://client/rendering/grid.gdshader" id="3"]
+
+[sub_resource type="ShaderMaterial" id="grid_mat"]
+shader = ExtResource("3")
+
+[sub_resource type="PlaneMesh" id="grid_mesh"]
+material = SubResource("grid_mat")
+size = Vector2(400, 400)
+
+[sub_resource type="StandardMaterial3D" id="goto_mat"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.3, 0.9, 0.5, 0.6)
+
+[sub_resource type="PlaneMesh" id="goto_mesh"]
+material = SubResource("goto_mat")
+size = Vector2(0.8, 0.8)
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1")
+
+[node name="IsoCamera" type="Camera3D" parent="."]
+script = ExtResource("2")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+
+[node name="Grid" type="MeshInstance3D" parent="."]
+mesh = SubResource("grid_mesh")
+
+[node name="GotoMarker" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+visible = false
+mesh = SubResource("goto_mesh")

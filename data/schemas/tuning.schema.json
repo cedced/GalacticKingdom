@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "galacticrealm/tuning.schema.json",
+  "title": "Gameplay tunables",
+  "description": "All magic numbers used by gameplay code (CLAUDE.md Section 6). Loaded through sim/tuning.gd and read with dotted paths, e.g. Tuning.value(\"net.tick_hz\").",
+  "type": "object",
+  "required": ["net", "render", "autopilot"],
+  "additionalProperties": false,
+  "properties": {
+    "autopilot": {
+      "type": "object",
+      "required": ["arrive_radius", "turn_gain", "thrust_cone_deg", "brake_margin", "heading_deadzone_deg", "thrust_softness"],
+      "additionalProperties": false,
+      "properties": {
+        "arrive_radius": { "type": "number", "exclusiveMinimum": 0, "description": "Within this range the go-to target counts as reached." },
+        "brake_margin": { "type": "number", "minimum": 1, "description": "Safety factor padding the computed flip-and-burn braking distance; higher starts braking earlier." },
+        "turn_gain": { "type": "number", "exclusiveMinimum": 0, "description": "Proportional rudder gain on heading error in radians." },
+        "thrust_cone_deg": { "type": "number", "exclusiveMinimum": 0, "maximum": 180, "description": "Thrust only while heading error is inside this cone." },
+        "heading_deadzone_deg": { "type": "number", "minimum": 0, "description": "Rudder stays centered for heading errors under this; stops micro-hunting." },
+        "thrust_softness": { "type": "number", "exclusiveMinimum": 0, "description": "Speed deficit (units/s) at which thrust reaches full; lower is snappier, higher is smoother." }
+      }
+    },
+    "net": {
+      "type": "object",
+      "required": ["tick_hz", "port", "max_peers", "interp_delay_ms", "snap_correction_dist"],
+      "additionalProperties": false,
+      "properties": {
+        "tick_hz": { "type": "integer", "minimum": 1, "description": "Server fixed sim tick rate. 20 per CLAUDE.md Section 5." },
+        "port": { "type": "integer", "minimum": 1024, "maximum": 65535 },
+        "max_peers": { "type": "integer", "minimum": 1 },
+        "interp_delay_ms": { "type": "integer", "minimum": 0, "description": "Remote entities render this far behind the newest snapshot." },
+        "snap_correction_dist": { "type": "number", "exclusiveMinimum": 0, "description": "Prediction error beyond this many units snaps instead of blending." }
+      }
+    },
+    "render": {
+      "type": "object",
+      "required": ["pitch_deg", "yaw_deg", "zoom_levels", "default_zoom_index", "camera_distance"],
+      "additionalProperties": false,
+      "properties": {
+        "pitch_deg": { "type": "number", "description": "30 gives the 2:1 classic iso read (CLAUDE.md Section 4)." },
+        "yaw_deg": { "type": "number" },
+        "zoom_levels": {
+          "type": "array",
+          "items": { "type": "number", "exclusiveMinimum": 0 },
+          "minItems": 1,
+          "description": "Orthographic camera size per zoom step. Zoom changes size, never position."
+        },
+        "default_zoom_index": { "type": "integer", "minimum": 0 },
+        "camera_distance": { "type": "number", "exclusiveMinimum": 0, "description": "How far back along the view axis the camera sits. Cosmetic only under ortho." }
+      }
+    }
+  }
+}

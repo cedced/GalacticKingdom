@@ -1,0 +1,11 @@
+# Godot generated caches (never commit imported artifacts, see assets/README.md)
+.godot/
+
+# Per CLAUDE.md Section 7.9
+*.db
+exports/
+.env
+
+# Local editor cruft
+*.tmp
+*.bak

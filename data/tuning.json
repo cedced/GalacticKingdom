@@ -1,0 +1,24 @@
+{
+  "autopilot": {
+    "arrive_radius": 0.75,
+    "turn_gain": 4.0,
+    "thrust_cone_deg": 60.0,
+    "brake_margin": 1.3,
+    "heading_deadzone_deg": 2.0,
+    "thrust_softness": 2.0
+  },
+  "net": {
+    "tick_hz": 20,
+    "port": 7777,
+    "max_peers": 32,
+    "interp_delay_ms": 100,
+    "snap_correction_dist": 5.0
+  },
+  "render": {
+    "pitch_deg": 30.0,
+    "yaw_deg": 45.0,
+    "zoom_levels": [8.0, 12.0, 18.0, 27.0, 40.0],
+    "default_zoom_index": 2,
+    "camera_distance": 60.0
+  }
+}

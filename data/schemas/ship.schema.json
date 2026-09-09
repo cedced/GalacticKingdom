@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "galacticrealm/ship.schema.json",
+  "title": "Hull definition",
+  "description": "One hull per file under data/ships/. File name matches the id field. The model path must point at assets/ships/<id>/<id>.glb (see assets/README.md).",
+  "type": "object",
+  "required": ["id", "display_name", "model", "mass", "accel", "max_speed", "turn_rate_deg", "drag", "cargo_slots"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model": {
+      "type": "string",
+      "pattern": "^res://assets/ships/.+\\.glb$"
+    },
+    "mass": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Warp fuel cost per jump scales with mass (M1)."
+    },
+    "accel": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Forward thrust acceleration, units/s^2."
+    },
+    "max_speed": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Speed cap, units/s."
+    },
+    "turn_rate_deg": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Turn rate at full rudder, degrees/s."
+    },
+    "drag": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Velocity damping factor per second. 0 = pure Newtonian drift."
+    },
+    "cargo_slots": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Cargo bays. Gameplay use starts at M2 (trade)."
+    }
+  }
+}
