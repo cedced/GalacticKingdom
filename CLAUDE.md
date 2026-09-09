@@ -80,6 +80,7 @@ Recorded as ADR-001 in `wiki/adr/`. Change the stack only via a new ADR.
     factions/               reputation, territory, diplomacy
     entities/               ships, players, NPCs, structures (data-only)
     motion/                 ship motion integration, shared by server tick and client prediction
+  net/                      wire protocol shared by both peers: the RpcSurface node (declarations + signals, no logic)
   server/                   authoritative game server (uses sim/)
     net/                    replication, snapshots, RPC handlers
     persistence/            DB access layer, migrations

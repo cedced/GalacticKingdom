@@ -6,19 +6,22 @@ extends Node3D
 
 const SHIP_SCENE: PackedScene = preload("res://client/scenes/ship.tscn")
 const DEFAULT_SERVER_ADDRESS: String = "127.0.0.1"
-const RECONCILE_BLEND: float = 0.15
 
 var _hull: HullDef = null
+var _my_entity_id: int = 0
 var _my_state: ShipState = null
 var _my_intent: ShipIntent = ShipIntent.new()
 var _views: Dictionary[int, ShipView] = {}
 var _got_first_snapshot: bool = false
 var _autopilot: AutopilotParams = null
+var _reconcile_blend: float = 0.0
+var _snap_correction_dist: float = 0.0
 var _goto_active: bool = false
 var _goto_target: Vector2 = Vector2.ZERO
 
 @onready var _camera: IsoCamera = $IsoCamera
 @onready var _goto_marker: Node3D = $GotoMarker
+@onready var _rpc: RpcSurface = $Rpc
 
 
 func _ready() -> void:
@@ -36,6 +39,10 @@ func _ready() -> void:
 		get_tree().quit(1)
 		return
 	_autopilot = AutopilotParams.from_tuning()
+	_reconcile_blend = Tuning.value_f("net.reconcile_blend")
+	_snap_correction_dist = Tuning.value_f("net.snap_correction_dist")
+	_rpc.welcomed.connect(_on_welcomed)
+	_rpc.snapshot_received.connect(_on_snapshot_received)
 	$Sun.rotation_degrees = Vector3(-50.0, -30.0, 0.0)
 	_connect_to_server(_server_address())
 
@@ -44,7 +51,7 @@ func _physics_process(delta: float) -> void:
 	if _my_state == null:
 		return
 	_my_intent = _resolve_intent()
-	submit_intent.rpc_id(1, _my_intent.thrust, _my_intent.turn)
+	_rpc.submit_intent.rpc_id(1, _my_intent.thrust, _my_intent.turn)
 	# Prediction: same integrator the server runs (wiki/systems/networking.md).
 	Motion.step(_my_state, _my_intent, _hull, delta)
 
@@ -84,13 +91,12 @@ func _clear_goto() -> void:
 func _process(_delta: float) -> void:
 	if _my_state == null:
 		return
-	var my_id: int = multiplayer.get_unique_id()
-	if not _views.has(my_id):
+	if not _views.has(_my_entity_id):
 		return
 	# The predicted state updates at the 20 Hz sim tick; render through the
 	# view's blend (and follow the blended view with the camera) so the local
 	# ship stays smooth at any display rate.
-	var view: ShipView = _views[my_id]
+	var view: ShipView = _views[_my_entity_id]
 	view.set_target(_my_state.position, _my_state.heading)
 	_camera.set_target(Vector3(view.position.x, 0.0, view.position.z))
 
@@ -126,6 +132,7 @@ func _on_connection_failed() -> void:
 
 func _on_server_disconnected() -> void:
 	Log.warn("net", "server disconnected", {})
+	_my_entity_id = 0
 	_my_state = null
 	_got_first_snapshot = false
 	for view: ShipView in _views.values():
@@ -133,59 +140,56 @@ func _on_server_disconnected() -> void:
 	_views.clear()
 
 
-## Server -> client. RPC config must match server/main.gd exactly.
-@rpc("authority", "call_remote", "unreliable_ordered")
-func receive_snapshot(_tick_num: int, ships: Dictionary) -> void:
+func _on_welcomed(entity_id: int) -> void:
+	_my_entity_id = entity_id
+	Log.info("net", "welcomed", {"entity_id": entity_id})
+
+
+func _on_snapshot_received(_tick_num: int, ships: Dictionary) -> void:
+	if _my_entity_id == 0:
+		return  # Snapshots ride an unreliable channel and can beat the welcome.
 	if not _got_first_snapshot:
 		_got_first_snapshot = true
 		Log.info("net", "first snapshot received", {"ships": ships.size()})
-	var my_id: int = multiplayer.get_unique_id()
-	for peer_id: int in ships:
-		var packed: PackedFloat32Array = ships[peer_id]
-		_ensure_view(peer_id, packed)
-		if peer_id == my_id:
-			_reconcile_local(packed)
+	for entity_id: int in ships:
+		var state: ShipState = ShipState.unpack(ships[entity_id])
+		if state == null:
+			continue
+		_ensure_view(entity_id, state)
+		if entity_id == _my_entity_id:
+			_reconcile_local(state)
 		else:
-			_views[peer_id].set_target(Vector2(packed[0], packed[1]), packed[2])
-	for peer_id: int in _views.keys():
-		if not ships.has(peer_id):
-			_views[peer_id].queue_free()
-			_views.erase(peer_id)
+			_views[entity_id].set_target(state.position, state.heading)
+	for entity_id: int in _views.keys():
+		if not ships.has(entity_id):
+			_views[entity_id].queue_free()
+			_views.erase(entity_id)
 
 
-## Client -> server. Declared here so both peers agree on the RPC table;
-## the body only runs on the server.
-@rpc("any_peer", "call_remote", "unreliable_ordered")
-func submit_intent(_thrust: float, _turn: float) -> void:
-	pass
-
-
-func _ensure_view(peer_id: int, packed: PackedFloat32Array) -> void:
-	if _views.has(peer_id):
+func _ensure_view(entity_id: int, state: ShipState) -> void:
+	if _views.has(entity_id):
 		return
 	var view: ShipView = SHIP_SCENE.instantiate()
-	view.name = "Ship%d" % peer_id
+	view.name = "Ship%d" % entity_id
 	add_child(view)
-	view.set_immediate(Vector2(packed[0], packed[1]), packed[2])
-	_views[peer_id] = view
+	view.set_immediate(state.position, state.heading)
+	_views[entity_id] = view
 	Log.info("net", "ship view created", {
-		"peer": peer_id, "remote": peer_id != multiplayer.get_unique_id()
+		"entity": entity_id, "remote": entity_id != _my_entity_id
 	})
-	if peer_id == multiplayer.get_unique_id() and _my_state == null:
-		_my_state = Entities.make_ship_state(Vector2(packed[0], packed[1]))
-		_my_state.heading = packed[2]
+	if entity_id == _my_entity_id and _my_state == null:
+		_my_state = Entities.make_ship_state(state.position)
+		_my_state.heading = state.heading
 
 
 ## M0 reconciliation: blend gently toward the authoritative state, snap on
 ## large error. Full rewind-and-replay is an M1+ item (networking wiki page).
-func _reconcile_local(packed: PackedFloat32Array) -> void:
-	var server_pos: Vector2 = Vector2(packed[0], packed[1])
-	var server_vel: Vector2 = Vector2(packed[3], packed[4])
-	if _my_state.position.distance_to(server_pos) > Tuning.value_f("net.snap_correction_dist"):
-		_my_state.position = server_pos
-		_my_state.velocity = server_vel
-		_my_state.heading = packed[2]
+func _reconcile_local(server_state: ShipState) -> void:
+	if _my_state.position.distance_to(server_state.position) > _snap_correction_dist:
+		_my_state.position = server_state.position
+		_my_state.velocity = server_state.velocity
+		_my_state.heading = server_state.heading
 		return
-	_my_state.position = _my_state.position.lerp(server_pos, RECONCILE_BLEND)
-	_my_state.velocity = _my_state.velocity.lerp(server_vel, RECONCILE_BLEND)
-	_my_state.heading = lerp_angle(_my_state.heading, packed[2], RECONCILE_BLEND)
+	_my_state.position = _my_state.position.lerp(server_state.position, _reconcile_blend)
+	_my_state.velocity = _my_state.velocity.lerp(server_state.velocity, _reconcile_blend)
+	_my_state.heading = lerp_angle(_my_state.heading, server_state.heading, _reconcile_blend)

@@ -9,20 +9,21 @@ Keep every client's view consistent with the authoritative server at playable la
 
 ## Data model
 - Intent message: `{tick, thrust, turn, fire_primary, fire_secondary, enter_mode, action?}` sent every client tick. M0 implements the `thrust, turn` subset as an unreliable-ordered RPC (`submit_intent`); the rest arrives with combat (M3).
-- Snapshot delta: per-entity position, velocity, facing, shields, energy, plus event list (spawn, despawn, hit, death). M0 sends full state every tick (`receive_snapshot`: tick + per-peer `PackedFloat32Array [pos_x, pos_z, heading, vel_x, vel_z]`); deltas and the event list are M1+.
+- Snapshot delta: per-entity position, velocity, facing, shields, energy, plus event list (spawn, despawn, hit, death). Currently full state every tick (`receive_snapshot`: tick + a Dictionary keyed by **entity id** of `ShipState.pack()` arrays); deltas and the event list are open. The packed layout lives only in `ShipState.pack()/unpack()` (`PACK_STRIDE` floats) — never hand-decode it.
+- Entity ids are server-assigned and distinct from ENet peer ids (`receive_welcome` tells a fresh peer which entity is its ship). Peer ids die with the connection; entity ids are the namespace NPCs, sleepers, and structures will share.
 - Reliable RPCs for trade, dock, quest accept, chat.
-- M0 wiring: RPC endpoints live on the root `Main` node of both `client/main.gd` and `server/main.gd`; the two declarations must stay config-identical. Spawn/despawn is implied by peers appearing in or dropping out of the snapshot.
-- Both ends run the fixed `net.tick_hz` sim tick (client pins `Engine.physics_ticks_per_second` too); ship views blend the 20 Hz state up to display rate.
+- Wiring: every RPC is declared once in `net/rpc_surface.gd`, a pure-transport node both entry scenes instance at the same path (`/root/Main/Rpc`). Its methods only re-emit payloads as signals; the hosting side connects the handlers. Godot matches RPCs by node path + method + config, so a single shared declaration makes drift impossible. Spawn/despawn is implied by entities appearing in or dropping out of the snapshot.
+- Both ends run the fixed `net.tick_hz` sim tick (client pins `Engine.physics_ticks_per_second` too); ship views blend the 20 Hz state up to display rate at `net.view_blend_rate`.
 - Dead-man's switch: an intent older than `net.intent_timeout_ms` is treated as idle, so a frozen or lossy client's ship coasts to a stop instead of burning forever.
 
 ## Algorithms
-- Client prediction for the local ship using the same `sim/` movement code. Server sends acknowledged tick; client rewinds and replays unacknowledged intents on mismatch beyond a threshold. M0 ships a simpler version: predict with `sim/motion`, blend gently toward each authoritative snapshot, hard-snap beyond `net.snap_correction_dist`. Rewind-and-replay is open.
-- Remote entities interpolated 100 ms behind the latest snapshot.
+- Client prediction for the local ship using the same `sim/` movement code. Server sends acknowledged tick; client rewinds and replays unacknowledged intents on mismatch beyond a threshold. M0 ships a simpler version: predict with `sim/motion`, blend toward each authoritative snapshot at `net.reconcile_blend`, hard-snap beyond `net.snap_correction_dist`. Rewind-and-replay is open.
+- Remote entities blend exponentially toward the newest snapshot (`net.view_blend_rate`). A proper interpolation buffer that renders a fixed delay behind the newest snapshot is open; add its knob back when it exists.
 - Lag compensation for hits: server rewinds hitboxes to the shooter's view time, capped at 200 ms.
 - Interest management: clients receive only entities in their system and within a radius.
 
 ## Tuning knobs
-`net.tick_hz`, `net.interp_delay_ms`, `net.lag_comp_max_ms`, `net.interest_radius`.
+`net.tick_hz`, `net.intent_timeout_ms`, `net.snap_correction_dist`, `net.reconcile_blend`, `net.view_blend_rate`; M3 adds `net.lag_comp_max_ms`, `net.interest_radius`.
 
 ## Interactions
 - All of `sim/` must be pure enough to run on both ends.

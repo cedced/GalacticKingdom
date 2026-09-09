@@ -27,9 +27,9 @@ Each known issue is assigned to the milestone that must absorb it. Do not start 
 | Spawn ring repeated after 4 ships | M0 hardening | fixed |
 | `default_zoom_index` out of range crashed client boot | M0 hardening | fixed |
 | Client imported `server/` class for the starter hull id | M0 hardening | fixed (moved to `world.starter_hull_id` in `data/tuning.json`) |
-| Snapshot wire layout hand-decoded at five sites — add `ShipState.pack()/unpack()` | M1, first netcode task | open |
-| RPC surface duplicated across both mains, sync'd only by comment; CI never connects a client | M1, with the new jump/dock RPCs | open |
-| Net-feel tunables split-brained (`net.interp_delay_ms` unread; `BLEND_RATE`, `RECONCILE_BLEND` hardcoded) | M1, with the netcode work | open |
-| `peer_id` doubles as entity id — blocks NPCs, sleepers, multi-room interest | M1, with the snapshot codec | open |
+| Snapshot wire layout hand-decoded at five sites — add `ShipState.pack()/unpack()` | M1, first netcode task | fixed |
+| RPC surface duplicated across both mains, sync'd only by comment; CI never connects a client | M1, with the new jump/dock RPCs | fixed (shared `net/rpc_surface.gd` node + CI client-connect step) |
+| Net-feel tunables split-brained (`net.interp_delay_ms` unread; `BLEND_RATE`, `RECONCILE_BLEND` hardcoded) | M1, with the netcode work | fixed (`net.view_blend_rate`, `net.reconcile_blend`; dead knob removed) |
+| `peer_id` doubles as entity id — blocks NPCs, sleepers, multi-room interest | M1, with the snapshot codec | fixed |
 | Server names each ship's hull at spawn; client renders `HullDef.model` instead of a baked scene | M2, when a second ship exists | open |
 | CI caching/dedup, action version bumps, `ship.gd`/`ShipView` naming | opportunistic | open |

@@ -30,7 +30,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install "gdtoolkit==4.*"
-      - run: gdlint sim server client tests
+      - run: gdlint sim net server client tests
 
   test:
     name: Unit tests + headless boot
@@ -51,6 +51,15 @@ jobs:
         run: |
           godot --headless --path . --main-scene res://server/main.tscn --quit-after 60 | tee server_boot.log
           grep -q "\[INFO\]\[server\] listening" server_boot.log
+      - name: Client connects and receives a snapshot
+        run: |
+          godot --headless --path . --main-scene res://server/main.tscn > server_run.log 2>&1 &
+          SERVER_PID=$!
+          sleep 3
+          godot --headless --path . --main-scene res://client/main.tscn --quit-after 400 | tee client_run.log
+          kill $SERVER_PID
+          grep -q "\[INFO\]\[net\] welcomed" client_run.log
+          grep -q "\[INFO\]\[net\] first snapshot received" client_run.log
 
   # TODO(M1): headless export job. Needs export templates (~1 GB download) and
   # an export_presets.cfg; deferred until there is a build worth exporting.

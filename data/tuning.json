@@ -11,9 +11,10 @@
     "tick_hz": 20,
     "port": 7777,
     "max_peers": 32,
-    "interp_delay_ms": 100,
     "snap_correction_dist": 5.0,
-    "intent_timeout_ms": 500
+    "intent_timeout_ms": 500,
+    "view_blend_rate": 12.0,
+    "reconcile_blend": 0.15
   },
   "world": {
     "starter_hull_id": "merchant_mk1",

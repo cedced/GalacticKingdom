@@ -31,15 +31,16 @@
     },
     "net": {
       "type": "object",
-      "required": ["tick_hz", "port", "max_peers", "interp_delay_ms", "snap_correction_dist", "intent_timeout_ms"],
+      "required": ["tick_hz", "port", "max_peers", "snap_correction_dist", "intent_timeout_ms", "view_blend_rate", "reconcile_blend"],
       "additionalProperties": false,
       "properties": {
         "tick_hz": { "type": "integer", "minimum": 1, "description": "Fixed sim tick rate for the server AND client prediction. 20 per CLAUDE.md Section 5." },
         "intent_timeout_ms": { "type": "integer", "minimum": 50, "description": "A ship whose peer sends no intent for this long is treated as idle (dead-man's switch for frozen or lossy clients)." },
         "port": { "type": "integer", "minimum": 1024, "maximum": 65535 },
         "max_peers": { "type": "integer", "minimum": 1 },
-        "interp_delay_ms": { "type": "integer", "minimum": 0, "description": "Remote entities render this far behind the newest snapshot." },
-        "snap_correction_dist": { "type": "number", "exclusiveMinimum": 0, "description": "Prediction error beyond this many units snaps instead of blending." }
+        "snap_correction_dist": { "type": "number", "exclusiveMinimum": 0, "description": "Prediction error beyond this many units snaps instead of blending." },
+        "view_blend_rate": { "type": "number", "exclusiveMinimum": 0, "description": "Exponential blend rate (1/s) of ship views toward the latest network state; higher is snappier." },
+        "reconcile_blend": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Fraction of the prediction error corrected per snapshot when under snap_correction_dist." }
       }
     },
     "render": {

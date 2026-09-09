@@ -6,6 +6,13 @@ extends Node
 
 var _room: SystemRoom = null
 var _tick: int = 0
+## peer id -> server-assigned entity id. Entity ids outlive nothing yet, but
+## keeping them distinct from peer ids is what lets NPCs and sleepers share
+## the snapshot namespace later.
+var _entity_ids: Dictionary[int, int] = {}
+var _next_entity_id: int = 1
+
+@onready var _rpc: RpcSurface = $Rpc
 
 
 func _ready() -> void:
@@ -28,6 +35,7 @@ func _ready() -> void:
 	multiplayer.multiplayer_peer = peer
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
+	_rpc.intent_received.connect(_on_intent_received)
 	Log.info("server", "listening", {"port": port, "tick_hz": Tuning.value_i("net.tick_hz")})
 
 
@@ -35,27 +43,25 @@ func _physics_process(delta: float) -> void:
 	_tick += 1
 	_room.step(delta)
 	if multiplayer.get_peers().size() > 0:
-		receive_snapshot.rpc(_tick, _room.snapshot())
+		_rpc.receive_snapshot.rpc(_tick, _room.snapshot())
 
 
 func _on_peer_connected(peer_id: int) -> void:
-	Log.info("server", "peer connected", {"peer": peer_id})
-	_room.add_ship(peer_id)
+	var entity_id: int = _next_entity_id
+	_next_entity_id += 1
+	_entity_ids[peer_id] = entity_id
+	Log.info("server", "peer connected", {"peer": peer_id, "entity": entity_id})
+	_room.add_ship(entity_id)
+	_rpc.receive_welcome.rpc_id(peer_id, entity_id)
 
 
 func _on_peer_disconnected(peer_id: int) -> void:
 	Log.info("server", "peer disconnected", {"peer": peer_id})
-	_room.remove_ship(peer_id)
+	if _entity_ids.has(peer_id):
+		_room.remove_ship(_entity_ids[peer_id])
+		_entity_ids.erase(peer_id)
 
 
-## Client -> server. RPC config must match client/main.gd exactly.
-@rpc("any_peer", "call_remote", "unreliable_ordered")
-func submit_intent(thrust: float, turn: float) -> void:
-	_room.set_intent(multiplayer.get_remote_sender_id(), thrust, turn)
-
-
-## Server -> client. Declared here so both peers agree on the RPC table;
-## the body only runs on clients.
-@rpc("authority", "call_remote", "unreliable_ordered")
-func receive_snapshot(_tick_num: int, _ships: Dictionary) -> void:
-	pass
+func _on_intent_received(peer_id: int, thrust: float, turn: float) -> void:
+	if _entity_ids.has(peer_id):
+		_room.set_intent(_entity_ids[peer_id], thrust, turn)
