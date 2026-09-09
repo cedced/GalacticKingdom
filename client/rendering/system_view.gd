@@ -9,10 +9,14 @@ extends Node3D
 ## Presentation only, heights never touch the sim (CLAUDE.md Section 4).
 
 const BODY_SHADER: Shader = preload("res://client/rendering/body_billboard.gdshader")
+const BACKDROP_SHADER: Shader = preload("res://client/rendering/backdrop.gdshader")
 const BACKDROP_TEXTURE: Texture2D = preload("res://assets/backgrounds/galaxy_full.jpg")
-## Fraction of the galaxy master image one system's backdrop shows.
-const BACKDROP_CROP: float = 0.25
-const BACKDROP_SIZE: float = 600.0
+## One system's backdrop shows a square crop this fraction of the master
+## image's height (short side), aspect-corrected so stars stay round.
+const BACKDROP_CROP: float = 0.5
+## Just past what the camera can see at max zoom-out around the gate ring;
+## a small plane keeps the texture density up.
+const BACKDROP_SIZE: float = 240.0
 ## Sprite canvases keep a transparent margin around the ball, so the quad
 ## is larger than the sphere it replaces.
 const PLANET_QUAD_PER_SIZE: float = 3.0
@@ -64,18 +68,20 @@ func rebuild(system: StarSystem, map_extent: float) -> void:
 func _add_backdrop(map_pos: Vector2, map_extent: float) -> void:
 	var plane: PlaneMesh = PlaneMesh.new()
 	plane.size = Vector2(BACKDROP_SIZE, BACKDROP_SIZE)
-	var material: StandardMaterial3D = StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.albedo_texture = BACKDROP_TEXTURE
-	# Darkened so ships and stations stay readable on top of it.
-	material.albedo_color = Color(0.55, 0.55, 0.6)
-	var uv_center: Vector2 = Vector2(0.5, 0.5) + map_pos / map_extent * 0.5 * (1.0 - BACKDROP_CROP)
-	material.uv1_scale = Vector3(BACKDROP_CROP, BACKDROP_CROP, 1.0)
-	material.uv1_offset = Vector3(
-		clampf(uv_center.x - BACKDROP_CROP * 0.5, 0.0, 1.0 - BACKDROP_CROP),
-		clampf(uv_center.y - BACKDROP_CROP * 0.5, 0.0, 1.0 - BACKDROP_CROP),
-		0.0
-	)
+	var texture_size: Vector2 = BACKDROP_TEXTURE.get_size()
+	# A square pixel region of the master, so the crop is not stretched by
+	# the image's aspect ratio.
+	var crop_px: float = minf(texture_size.x, texture_size.y) * BACKDROP_CROP
+	var uv_scale: Vector2 = Vector2(crop_px / texture_size.x, crop_px / texture_size.y)
+	# Galaxy-map position picks the region: core systems on the bright
+	# bulge, rim systems on dark arms.
+	var t: Vector2 = (map_pos / map_extent * 0.5 + Vector2(0.5, 0.5)).clampf(0.0, 1.0)
+	var material: ShaderMaterial = ShaderMaterial.new()
+	material.shader = BACKDROP_SHADER
+	material.set_shader_parameter("master", BACKDROP_TEXTURE)
+	material.set_shader_parameter("uv_scale", uv_scale)
+	material.set_shader_parameter("uv_offset", (Vector2.ONE - uv_scale) * t)
+	material.set_shader_parameter("star_seed", map_pos)
 	var mesh: MeshInstance3D = MeshInstance3D.new()
 	mesh.mesh = plane
 	mesh.material_override = material
