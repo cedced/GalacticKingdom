@@ -1,0 +1,10 @@
+{
+  "id": "sun_giant",
+  "kind": "sun",
+  "sprite_dir": "res://assets/bodies/suns/sun_giant",
+  "spin_speed": 0.05,
+  "tint_mix": 0.85,
+  "corona": true,
+  "pulse": 0.03,
+  "star_types": ["yellow", "orange", "red_dwarf", "white", "blue_giant", "red_giant"]
+}

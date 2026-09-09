@@ -1,0 +1,8 @@
+{
+  "id": "planet_terran",
+  "kind": "planet",
+  "sprite_dir": "res://assets/bodies/planets/planet_terran",
+  "spin_speed": 0.02,
+  "tint_mix": 0.25,
+  "biomes": ["earthlike", "oceanic", "greenhouse", "arctic"]
+}

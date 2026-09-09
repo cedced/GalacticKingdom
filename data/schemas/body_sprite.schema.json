@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "galactickingdom/body_sprite.schema.json",
+  "title": "Body sprite definition",
+  "description": "Maps generated body/star ids to a sprite under assets/bodies/ and says how the client animates it. Presentation only: the server never reads these (assets/README.md). The sprite folder holds sheet.png + sheet.json; a 1-frame sheet is animated by shader UV rotation instead of frame playback.",
+  "type": "object",
+  "required": ["id", "kind", "sprite_dir", "spin_speed", "tint_mix"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9_]+$", "description": "Must match the filename and the sprite folder name." },
+    "kind": { "enum": ["planet", "sun"] },
+    "sprite_dir": { "type": "string", "pattern": "^res://assets/bodies/.+", "description": "Folder containing sheet.png and sheet.json." },
+    "spin_speed": { "type": "number", "description": "Radians/second of shader UV rotation used when the sheet has a single frame. Sign sets direction." },
+    "tint_mix": { "type": "number", "minimum": 0, "maximum": 1, "description": "0 renders the sprite untouched; 1 fully recolors its luminance with the biome/star tint." },
+    "corona": { "type": "boolean", "description": "Suns only: blend a second counter-rotating copy for a churning look." },
+    "pulse": { "type": "number", "minimum": 0, "maximum": 0.2, "description": "Relative scale breathing amplitude (suns)." },
+    "biomes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Planet sprites: generated biomes this sprite covers. A biome listed nowhere falls back to the primitive sphere."
+    },
+    "star_types": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Sun sprites: generated star types this sprite covers."
+    }
+  },
+  "allOf": [
+    { "if": { "properties": { "kind": { "const": "planet" } } }, "then": { "required": ["biomes"] } },
+    { "if": { "properties": { "kind": { "const": "sun" } } }, "then": { "required": ["star_types"] } }
+  ]
+}

@@ -1,11 +1,10 @@
-// Faint reference grid on the XZ play plane. An empty system gives no motion
-// parallax, so without this you cannot see yourself fly (M0 only; replaced by
-// backdrops from assets/backgrounds/ at M1).
+// Faint reference grid on the XZ play plane. Lines only, transparent
+// elsewhere: the galaxy backdrop (SystemView) sits just below this plane
+// and provides the ground since M1.
 shader_type spatial;
 render_mode unshaded, cull_disabled;
 
-uniform vec4 base_color: source_color = vec4(0.015, 0.02, 0.05, 1.0);
-uniform vec4 line_color: source_color = vec4(0.12, 0.16, 0.26, 1.0);
+uniform vec4 line_color: source_color = vec4(0.35, 0.45, 0.65, 0.16);
 uniform float cell_size = 6.0;
 uniform float line_width = 0.08;
 
@@ -19,5 +18,6 @@ void fragment() {
 	vec2 g = abs(fract(world_pos.xz / cell_size - 0.5) - 0.5) * cell_size;
 	float dist_to_line = min(g.x, g.y);
 	float line = 1.0 - smoothstep(0.0, line_width, dist_to_line);
-	ALBEDO = mix(base_color.rgb, line_color.rgb, line);
+	ALBEDO = line_color.rgb;
+	ALPHA = line * line_color.a;
 }

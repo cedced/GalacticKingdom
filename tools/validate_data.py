@@ -9,6 +9,8 @@ Conventions:
 - data/tuning.json          -> data/schemas/tuning.schema.json
 - data/shard.json           -> data/schemas/shard.schema.json
 - data/ships/<id>.json      -> data/schemas/ship.schema.json (id must match filename)
+- data/bodies/<id>.json     -> data/schemas/body_sprite.schema.json (id must match filename,
+                               sprite_dir must hold sheet.png + sheet.json)
 """
 
 from __future__ import annotations
@@ -72,6 +74,31 @@ def validate_ships(errors: list[str]) -> int:
     return count
 
 
+def validate_body_sprites(errors: list[str]) -> int:
+    schema_path = SCHEMAS_DIR / "body_sprite.schema.json"
+    count = 0
+    for body_path in sorted((DATA_DIR / "bodies").glob("*.json")):
+        count += 1
+        validate(body_path, schema_path, errors)
+        try:
+            body = load_json(body_path)
+        except json.JSONDecodeError:
+            continue  # already reported by validate()
+        if body.get("id") != body_path.stem:
+            errors.append(
+                f"{body_path.relative_to(REPO_ROOT)}: id {body.get('id')!r} "
+                f"does not match filename {body_path.stem!r}"
+            )
+        sprite_dir = REPO_ROOT / str(body.get("sprite_dir", "")).removeprefix("res://")
+        for required in ("sheet.png", "sheet.json"):
+            if not (sprite_dir / required).is_file():
+                errors.append(
+                    f"{body_path.relative_to(REPO_ROOT)}: missing "
+                    f"{body.get('sprite_dir')}/{required}"
+                )
+    return count
+
+
 def validate_tuning_cross_fields(errors: list[str]) -> None:
     """Relations a JSON Schema cannot express."""
     try:
@@ -102,6 +129,7 @@ def main() -> int:
     count += 1
     validate(DATA_DIR / "shard.json", SCHEMAS_DIR / "shard.schema.json", errors)
     count += validate_ships(errors)
+    count += validate_body_sprites(errors)
     if errors:
         for line in errors:
             print(f"FAIL {line}")

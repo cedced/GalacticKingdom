@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bgkiytsgh8jrh"
-path="res://.godot/imported/Sun 05 Yellow Star Giant.E03.2k.png-22bf042e9553546fe3929c95105ba705.ctex"
+uid="uid://bu033luvngh6b"
+path="res://.godot/imported/sheet.png-faba8bd9a0e3ca087e88a95304ca4972.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/dump/Sun 05 Yellow Star Giant.E03.2k.png"
-dest_files=["res://.godot/imported/Sun 05 Yellow Star Giant.E03.2k.png-22bf042e9553546fe3929c95105ba705.ctex"]
+source_file="res://assets/bodies/planets/planet_terran/sheet.png"
+dest_files=["res://.godot/imported/sheet.png-faba8bd9a0e3ca087e88a95304ca4972.ctex"]
 
 [params]
 

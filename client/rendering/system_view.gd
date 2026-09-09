@@ -1,9 +1,22 @@
 class_name SystemView
 extends Node3D
 ## Builds the visible contents of the current star system from generated
-## data: star, bodies, stations, warp gates. Everything is a procedural 3D
-## primitive until the art direction lands (wiki/systems/rendering.md);
-## presentation only, heights never touch the sim (CLAUDE.md Section 4).
+## data: star, bodies, stations, warp gates, and a backdrop crop of the
+## galaxy master image. Suns and planets draw as animated billboards from
+## data/bodies/ (assets/README.md Bodies pipeline) and fall back to
+## procedural primitives for anything without a sprite; stations and gates
+## stay primitives until the art direction lands (wiki/systems/rendering.md).
+## Presentation only, heights never touch the sim (CLAUDE.md Section 4).
+
+const BODY_SHADER: Shader = preload("res://client/rendering/body_billboard.gdshader")
+const BACKDROP_TEXTURE: Texture2D = preload("res://assets/backgrounds/galaxy_full.jpg")
+## Fraction of the galaxy master image one system's backdrop shows.
+const BACKDROP_CROP: float = 0.25
+const BACKDROP_SIZE: float = 600.0
+## Sprite canvases keep a transparent margin around the ball, so the quad
+## is larger than the sphere it replaces.
+const PLANET_QUAD_PER_SIZE: float = 3.0
+const SUN_QUAD_SIZE: float = 13.0
 
 const STAR_COLORS: Dictionary[String, Color] = {
 	"yellow": Color(1.0, 0.84, 0.37),
@@ -32,9 +45,13 @@ const COLOR_STARBASE: Color = Color(0.95, 0.78, 0.30)
 const COLOR_GATE: Color = Color(0.45, 0.90, 0.95)
 
 
-func rebuild(system: StarSystem) -> void:
+## map_extent is the galaxy disc radius: the system's map position picks
+## which part of the master image backs it, so core systems sit on the
+## bright bulge and rim systems on dark arms — deterministic, no crop files.
+func rebuild(system: StarSystem, map_extent: float) -> void:
 	for child: Node in get_children():
 		child.queue_free()
+	_add_backdrop(system.position, map_extent)
 	_add_star(system.star_type)
 	for body: SystemBody in system.bodies:
 		_add_body(body)
@@ -44,15 +61,55 @@ func rebuild(system: StarSystem) -> void:
 		_add_gate(gate)
 
 
+func _add_backdrop(map_pos: Vector2, map_extent: float) -> void:
+	var plane: PlaneMesh = PlaneMesh.new()
+	plane.size = Vector2(BACKDROP_SIZE, BACKDROP_SIZE)
+	var material: StandardMaterial3D = StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_texture = BACKDROP_TEXTURE
+	# Darkened so ships and stations stay readable on top of it.
+	material.albedo_color = Color(0.55, 0.55, 0.6)
+	var uv_center: Vector2 = Vector2(0.5, 0.5) + map_pos / map_extent * 0.5 * (1.0 - BACKDROP_CROP)
+	material.uv1_scale = Vector3(BACKDROP_CROP, BACKDROP_CROP, 1.0)
+	material.uv1_offset = Vector3(
+		clampf(uv_center.x - BACKDROP_CROP * 0.5, 0.0, 1.0 - BACKDROP_CROP),
+		clampf(uv_center.y - BACKDROP_CROP * 0.5, 0.0, 1.0 - BACKDROP_CROP),
+		0.0
+	)
+	var mesh: MeshInstance3D = MeshInstance3D.new()
+	mesh.mesh = plane
+	mesh.material_override = material
+	mesh.position = Vector3(0.0, -0.5, 0.0)
+	add_child(mesh)
+
+
 func _add_star(star_type: String) -> void:
+	var def: BodySpriteDef = BodyCatalog.for_star_type(star_type)
 	var color: Color = STAR_COLORS.get(star_type, Color.WHITE)
-	var star: MeshInstance3D = _sphere(4.0, color, true)
-	star.position = Vector3(0.0, 0.0, 0.0)
-	add_child(star)
+	if def == null:
+		var star: MeshInstance3D = _sphere(4.0, color, true)
+		star.position = Vector3(0.0, 0.0, 0.0)
+		add_child(star)
+		return
+	var sprite: MeshInstance3D = _billboard(def, color, SUN_QUAD_SIZE)
+	# High enough that the camera-tilted quad never dips under the backdrop
+	# plane, which would depth-clip the corona to a straight edge.
+	sprite.position = Vector3(0.0, SUN_QUAD_SIZE * 0.45, 0.0)
+	add_child(sprite)
 
 
 func _add_body(body: SystemBody) -> void:
 	var pos: Vector2 = body.position()
+	if body.kind == "planet":
+		var def: BodySpriteDef = BodyCatalog.for_biome(body.biome)
+		var color: Color = BIOME_COLORS.get(body.biome, Color.GRAY)
+		if def != null:
+			var quad: float = body.size * PLANET_QUAD_PER_SIZE
+			var sprite: MeshInstance3D = _billboard(def, color, quad)
+			# Same backdrop-clearance rule as the sun.
+			sprite.position = Vector3(pos.x, maxf(body.size + 0.6, quad * 0.45), pos.y)
+			add_child(sprite)
+			return
 	var mesh: MeshInstance3D = null
 	if body.kind == "planet":
 		mesh = _sphere(body.size, BIOME_COLORS.get(body.biome, Color.GRAY), false)
@@ -71,7 +128,7 @@ func _add_station(station: SystemStation) -> void:
 	var is_starbase: bool = station.kind == "starbase"
 	var side: float = 3.0 if is_starbase else 2.0
 	var color: Color = COLOR_STARBASE if is_starbase else COLOR_PORT
-	var mesh: MeshInstance3D = _box(Vector3(side, side, side), color, true)
+	var mesh: MeshInstance3D = _box(Vector3(side, side, side), color, false)
 	mesh.position = Vector3(station.position.x, side * 0.75, station.position.y)
 	mesh.rotation.y = 0.25 * PI
 	add_child(mesh)
@@ -95,6 +152,25 @@ func _add_gate(gate: WarpGate) -> void:
 ## not the gate).
 func label_gate(gate: WarpGate, text: String) -> void:
 	_add_label(text, Vector3(gate.position.x, 4.5, gate.position.y))
+
+
+func _billboard(def: BodySpriteDef, tint: Color, quad_size: float) -> MeshInstance3D:
+	var quad: QuadMesh = QuadMesh.new()
+	quad.size = Vector2(quad_size, quad_size)
+	var material: ShaderMaterial = ShaderMaterial.new()
+	material.shader = BODY_SHADER
+	material.set_shader_parameter("sheet", def.texture)
+	material.set_shader_parameter("frames", def.frames)
+	material.set_shader_parameter("fps", def.fps)
+	material.set_shader_parameter("spin_speed", def.spin_speed)
+	material.set_shader_parameter("tint", Vector3(tint.r, tint.g, tint.b))
+	material.set_shader_parameter("tint_mix", def.tint_mix)
+	material.set_shader_parameter("corona", def.corona)
+	material.set_shader_parameter("pulse", def.pulse)
+	var mesh: MeshInstance3D = MeshInstance3D.new()
+	mesh.mesh = quad
+	mesh.material_override = material
+	return mesh
 
 
 func _sphere(radius: float, color: Color, emissive: bool) -> MeshInstance3D:
@@ -131,7 +207,7 @@ func _add_label(text: String, at: Vector3) -> void:
 	label.text = text
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.font_size = 48
-	label.pixel_size = 0.02
+	label.pixel_size = 0.011
 	label.modulate = Color(0.9, 0.95, 1.0, 0.9)
 	label.position = at
 	add_child(label)

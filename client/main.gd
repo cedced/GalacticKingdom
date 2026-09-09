@@ -20,6 +20,10 @@ var _snap_correction_dist: float = 0.0
 var _gate_radius: float = 0.0
 var _goto_active: bool = false
 var _goto_target: Vector2 = Vector2.ZERO
+## Debug: "-- --screenshot=<path>" saves a frame shortly after the first
+## snapshot and quits. Lets tooling eyeball the rendered scene.
+var _screenshot_path: String = ""
+var _screenshot_frames_left: int = 90
 
 var _galaxy: GalaxyData = null
 var _system_id: int = -1
@@ -61,6 +65,7 @@ func _ready() -> void:
 	_rpc.jumped.connect(_on_jumped)
 	_rpc.jump_denied.connect(_on_jump_denied)
 	$Sun.rotation_degrees = Vector3(-50.0, -30.0, 0.0)
+	_screenshot_path = _user_arg("screenshot", "")
 	_connect_to_server(_server_address())
 
 
@@ -117,6 +122,7 @@ func _process(_delta: float) -> void:
 		if _map.visible:
 			_map.set_fuel_info(fuel, _jump_cost)
 	_update_gate_hint()
+	_maybe_take_screenshot()
 	if _my_state == null or not _views.has(_my_entity_id):
 		return
 	# The predicted state updates at the 20 Hz sim tick; render through the
@@ -133,6 +139,19 @@ func _process(_delta: float) -> void:
 func _displayed_fuel() -> float:
 	var elapsed: float = Time.get_unix_time_from_system() - _fuel_updated_at
 	return Galaxy.accrued_fuel(_fuel, _fuel_cap, _fuel_per_minute, elapsed)
+
+
+func _maybe_take_screenshot() -> void:
+	if _screenshot_path == "" or not _got_first_snapshot:
+		return
+	_screenshot_frames_left -= 1
+	if _screenshot_frames_left > 0:
+		return
+	var image: Image = get_viewport().get_texture().get_image()
+	image.save_png(_screenshot_path)
+	Log.info("client", "screenshot saved", {"path": _screenshot_path})
+	_screenshot_path = ""
+	get_tree().quit()
 
 
 func _update_gate_hint() -> void:
@@ -181,10 +200,14 @@ func _connect_to_server(address: String) -> void:
 
 
 func _server_address() -> String:
+	return _user_arg("server", DEFAULT_SERVER_ADDRESS)
+
+
+func _user_arg(name: String, fallback: String) -> String:
 	for arg: String in OS.get_cmdline_user_args():
-		if arg.begins_with("--server="):
-			return arg.trim_prefix("--server=")
-	return DEFAULT_SERVER_ADDRESS
+		if arg.begins_with("--%s=" % name):
+			return arg.trim_prefix("--%s=" % name)
+	return fallback
 
 
 func _on_connected() -> void:
@@ -240,7 +263,7 @@ func _enter_system(system_id: int) -> void:
 	_system_id = system_id
 	_clear_goto()
 	var system: StarSystem = _galaxy.system(system_id)
-	_system_view.rebuild(system)
+	_system_view.rebuild(system, Tuning.value_f("galaxy.radius"))
 	for gate: WarpGate in system.gates:
 		_system_view.label_gate(gate, _galaxy.system(gate.to_system_id).name)
 	_hud.set_system(system)
