@@ -263,7 +263,7 @@ func _enter_system(system_id: int) -> void:
 	_system_id = system_id
 	_clear_goto()
 	var system: StarSystem = _galaxy.system(system_id)
-	_system_view.rebuild(system, Tuning.value_f("galaxy.radius"))
+	_system_view.rebuild(system)
 	for gate: WarpGate in system.gates:
 		_system_view.label_gate(gate, _galaxy.system(gate.to_system_id).name)
 	_hud.set_system(system)

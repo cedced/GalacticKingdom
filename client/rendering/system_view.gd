@@ -10,13 +10,11 @@ extends Node3D
 
 const BODY_SHADER: Shader = preload("res://client/rendering/body_billboard.gdshader")
 const BACKDROP_SHADER: Shader = preload("res://client/rendering/backdrop.gdshader")
-const BACKDROP_TEXTURE: Texture2D = preload("res://assets/backgrounds/galaxy_full.jpg")
-## One system's backdrop shows a square crop this fraction of the master
-## image's height (short side), aspect-corrected so stars stay round.
-const BACKDROP_CROP: float = 0.5
-## Just past what the camera can see at max zoom-out around the gate ring;
-## a small plane keeps the texture density up.
+## Just past what the camera can see at max zoom-out around the gate ring.
 const BACKDROP_SIZE: float = 240.0
+## The procedural nebula haze leans this much toward the system's star
+## color, so skies vary with the star overhead.
+const BACKDROP_STAR_TINT: float = 0.35
 ## Sprite canvases keep a transparent margin around the ball, so the quad
 ## is larger than the sphere it replaces.
 const PLANET_QUAD_PER_SIZE: float = 3.0
@@ -49,13 +47,10 @@ const COLOR_STARBASE: Color = Color(0.95, 0.78, 0.30)
 const COLOR_GATE: Color = Color(0.45, 0.90, 0.95)
 
 
-## map_extent is the galaxy disc radius: the system's map position picks
-## which part of the master image backs it, so core systems sit on the
-## bright bulge and rim systems on dark arms — deterministic, no crop files.
-func rebuild(system: StarSystem, map_extent: float) -> void:
+func rebuild(system: StarSystem) -> void:
 	for child: Node in get_children():
 		child.queue_free()
-	_add_backdrop(system.position, map_extent)
+	_add_backdrop(system)
 	_add_star(system.star_type)
 	for body: SystemBody in system.bodies:
 		_add_body(body)
@@ -65,23 +60,16 @@ func rebuild(system: StarSystem, map_extent: float) -> void:
 		_add_gate(gate)
 
 
-func _add_backdrop(map_pos: Vector2, map_extent: float) -> void:
+func _add_backdrop(system: StarSystem) -> void:
 	var plane: PlaneMesh = PlaneMesh.new()
 	plane.size = Vector2(BACKDROP_SIZE, BACKDROP_SIZE)
-	var texture_size: Vector2 = BACKDROP_TEXTURE.get_size()
-	# A square pixel region of the master, so the crop is not stretched by
-	# the image's aspect ratio.
-	var crop_px: float = minf(texture_size.x, texture_size.y) * BACKDROP_CROP
-	var uv_scale: Vector2 = Vector2(crop_px / texture_size.x, crop_px / texture_size.y)
-	# Galaxy-map position picks the region: core systems on the bright
-	# bulge, rim systems on dark arms.
-	var t: Vector2 = (map_pos / map_extent * 0.5 + Vector2(0.5, 0.5)).clampf(0.0, 1.0)
+	var star_color: Color = STAR_COLORS.get(system.star_type, Color.WHITE)
+	var haze: Color = Color(0.10, 0.14, 0.25).lerp(star_color, BACKDROP_STAR_TINT)
 	var material: ShaderMaterial = ShaderMaterial.new()
 	material.shader = BACKDROP_SHADER
-	material.set_shader_parameter("master", BACKDROP_TEXTURE)
-	material.set_shader_parameter("uv_scale", uv_scale)
-	material.set_shader_parameter("uv_offset", (Vector2.ONE - uv_scale) * t)
-	material.set_shader_parameter("star_seed", map_pos)
+	material.set_shader_parameter("nebula_color", haze)
+	# Map position as seed: unique sky per system, same sky every visit.
+	material.set_shader_parameter("star_seed", system.position)
 	var mesh: MeshInstance3D = MeshInstance3D.new()
 	mesh.mesh = plane
 	mesh.material_override = material
