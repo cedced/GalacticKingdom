@@ -24,6 +24,11 @@ const SUN_QUAD_SIZE: float = 13.0
 ## rarer (wiki/Glossary.md).
 const PORT_QUAD_SIZE: float = 4.4
 const STARBASE_QUAD_SIZE: float = 5.6
+## Flat sprites stack just above the grid and far below ship hover height
+## (0.5), so ships always depth-win. Distinct heights avoid z-fighting.
+const DECAL_HEIGHT_SUN: float = 0.06
+const DECAL_HEIGHT_BODY: float = 0.10
+const DECAL_HEIGHT_STATION: float = 0.14
 
 const STAR_COLORS: Dictionary[String, Color] = {
 	"yellow": Color(1.0, 0.84, 0.37),
@@ -93,10 +98,8 @@ func _add_star(star_type: String) -> void:
 	# The quad grows with corona_spread; the ball inside it does not, so it
 	# keeps matching collision.sun_radius.
 	var quad: float = SUN_QUAD_SIZE * def.corona_spread
-	var sprite: MeshInstance3D = _billboard(def, color, quad)
-	# High enough that the camera-tilted quad never dips under the backdrop
-	# plane, which would depth-clip the corona to a straight edge.
-	sprite.position = Vector3(0.0, quad * 0.45, 0.0)
+	var sprite: MeshInstance3D = _sprite_quad(def, color, quad)
+	sprite.position = Vector3(0.0, DECAL_HEIGHT_SUN, 0.0)
 	add_child(sprite)
 
 
@@ -107,22 +110,26 @@ func _add_body(body: SystemBody) -> void:
 		var color: Color = BIOME_COLORS.get(body.biome, Color.GRAY)
 		if def != null:
 			var quad: float = body.size * PLANET_QUAD_PER_SIZE
-			var sprite: MeshInstance3D = _billboard(def, color, quad)
-			# Same backdrop-clearance rule as the sun.
-			sprite.position = Vector3(pos.x, maxf(body.size + 0.6, quad * 0.45), pos.y)
+			var sprite: MeshInstance3D = _sprite_quad(def, color, quad)
+			sprite.position = Vector3(pos.x, DECAL_HEIGHT_BODY, pos.y)
 			add_child(sprite)
 			return
 	var mesh: MeshInstance3D = null
+	# Primitive fallbacks hug the plane: nothing may stand tall enough to
+	# hide a ship hovering at 0.5.
 	if body.kind == "planet":
 		mesh = _sphere(body.size, BIOME_COLORS.get(body.biome, Color.GRAY), false)
+		mesh.scale = Vector3(1.0, 0.25 / maxf(body.size, 0.25), 1.0)
+		mesh.position = Vector3(pos.x, 0.1, pos.y)
 	elif body.kind == "asteroids":
 		# A flattened lump reads as a field from the iso camera until real
 		# scattered rocks arrive with the art pass.
 		mesh = _sphere(body.size, COLOR_ASTEROIDS, false)
-		mesh.scale = Vector3(1.6, 0.3, 1.6)
+		mesh.scale = Vector3(1.6, 0.2 / maxf(body.size, 0.2), 1.6)
+		mesh.position = Vector3(pos.x, 0.1, pos.y)
 	else:
-		mesh = _box(Vector3(body.size, body.size * 0.5, body.size * 2.0), COLOR_DERELICT, false)
-	mesh.position = Vector3(pos.x, body.size, pos.y)
+		mesh = _box(Vector3(body.size, 0.3, body.size * 2.0), COLOR_DERELICT, false)
+		mesh.position = Vector3(pos.x, 0.15, pos.y)
 	add_child(mesh)
 
 
@@ -132,29 +139,29 @@ func _add_station(station: SystemStation) -> void:
 	var def: BodySpriteDef = BodyCatalog.for_station_kind(station.kind)
 	if def != null:
 		var quad: float = STARBASE_QUAD_SIZE if is_starbase else PORT_QUAD_SIZE
-		var sprite: MeshInstance3D = _billboard(def, color, quad)
-		sprite.position = Vector3(station.position.x, quad * 0.45, station.position.y)
+		var sprite: MeshInstance3D = _sprite_quad(def, color, quad)
+		sprite.position = Vector3(station.position.x, DECAL_HEIGHT_STATION, station.position.y)
 		add_child(sprite)
-		_add_label(str(station.kind), sprite.position + Vector3(0.0, quad * 0.55, 0.0))
+		_add_label(str(station.kind), sprite.position + Vector3(0.0, 2.5, 0.0))
 		return
 	var side: float = 3.0 if is_starbase else 2.0
-	var mesh: MeshInstance3D = _box(Vector3(side, side, side), color, false)
-	mesh.position = Vector3(station.position.x, side * 0.75, station.position.y)
+	var mesh: MeshInstance3D = _box(Vector3(side, 0.4, side), color, false)
+	mesh.position = Vector3(station.position.x, 0.2, station.position.y)
 	mesh.rotation.y = 0.25 * PI
 	add_child(mesh)
-	_add_label(str(station.kind), mesh.position + Vector3(0.0, side, 0.0))
+	_add_label(str(station.kind), mesh.position + Vector3(0.0, 2.5, 0.0))
 
 
 func _add_gate(gate: WarpGate) -> void:
+	# A flat pad ring on the plane: gates are flown over, and nothing that
+	# stands up can hide a ship behind it.
 	var torus: TorusMesh = TorusMesh.new()
-	torus.inner_radius = 1.2
-	torus.outer_radius = 1.8
+	torus.inner_radius = 1.4
+	torus.outer_radius = 2.0
 	var mesh: MeshInstance3D = MeshInstance3D.new()
 	mesh.mesh = torus
 	mesh.material_override = _material(COLOR_GATE, true)
-	mesh.position = Vector3(gate.position.x, 1.8, gate.position.y)
-	# Stand the ring upright, facing back at the system center.
-	mesh.rotation = Vector3(0.5 * PI, atan2(-gate.position.x, -gate.position.y), 0.0)
+	mesh.position = Vector3(gate.position.x, 0.15, gate.position.y)
 	add_child(mesh)
 
 
@@ -164,11 +171,19 @@ func label_gate(gate: WarpGate, text: String) -> void:
 	_add_label(text, Vector3(gate.position.x, 4.5, gate.position.y))
 
 
-func _billboard(def: BodySpriteDef, tint: Color, quad_size: float) -> MeshInstance3D:
+## A sprite lying flat on the play plane, stretched by 1/sin(pitch) along
+## the camera axis so it projects exactly like an upright billboard would.
+## Flat placement is the point: the sprite carries the ground's depth, so a
+## hovering ship is always drawn over it — nothing in a system can hide a
+## ship (transparent decals sort among themselves by camera distance, which
+## in iso is exactly "southern thing in front").
+func _sprite_quad(def: BodySpriteDef, tint: Color, quad_size: float) -> MeshInstance3D:
 	var quad: QuadMesh = QuadMesh.new()
-	quad.size = Vector2(quad_size, quad_size)
+	var pitch: float = deg_to_rad(Tuning.value_f("render.pitch_deg"))
+	quad.size = Vector2(quad_size, quad_size / sin(pitch))
 	var material: ShaderMaterial = ShaderMaterial.new()
 	material.shader = BODY_SHADER
+	material.set_shader_parameter("billboard_enabled", false)
 	material.set_shader_parameter("sheet", def.texture)
 	material.set_shader_parameter("frames", def.frames)
 	material.set_shader_parameter("fps", def.fps)
@@ -181,6 +196,9 @@ func _billboard(def: BodySpriteDef, tint: Color, quad_size: float) -> MeshInstan
 	var mesh: MeshInstance3D = MeshInstance3D.new()
 	mesh.mesh = quad
 	mesh.material_override = material
+	# Lie flat (normal up) with the image top pointing away from the camera,
+	# which is the ground direction that projects to screen-up.
+	mesh.rotation = Vector3(-0.5 * PI, deg_to_rad(Tuning.value_f("render.yaw_deg")), 0.0)
 	return mesh
 
 

@@ -1,11 +1,19 @@
-// Camera-facing sprite for planets and suns (assets/README.md Bodies
-// pipeline: bodies are billboards, and the fixed iso pitch means a spinning
-// sprite reads as a sphere). Handles both real rotation sheets (frames > 1,
-// played at fps) and the current single-angle stills, which are animated by
-// rotating the UVs instead; suns add a counter-rotating second layer for a
-// churning corona plus a slow pulse.
+// Sprite for suns, planets, and stations (assets/README.md Bodies
+// pipeline). Handles both real rotation sheets (frames > 1, played at fps)
+// and the current single-angle stills, which are animated by rotating the
+// UVs instead; suns add counter-rotating layers for a churning corona plus
+// a slow pulse.
+//
+// Two placements: billboard_enabled = true faces the camera (the quad's
+// own transform is ignored except position/scale); false leaves the quad
+// where the scene put it — SystemView lays sprites flat on the ground,
+// stretched against the iso foreshortening, so they project exactly like
+// billboards but carry the ground's depth: a hovering ship can never end
+// up hidden behind them.
 shader_type spatial;
 render_mode unshaded, cull_disabled;
+
+uniform bool billboard_enabled = true;
 
 uniform sampler2D sheet : source_color, filter_linear_mipmap;
 uniform int frames = 1;
@@ -42,12 +50,16 @@ vec4 sample_frame(vec2 uv, float angle, float zoom) {
 
 void vertex() {
 	float breathe = 1.0 + pulse * sin(TIME * 1.7);
-	MODELVIEW_MATRIX = VIEW_MATRIX * mat4(
-		INV_VIEW_MATRIX[0] * length(MODEL_MATRIX[0].xyz) * breathe,
-		INV_VIEW_MATRIX[1] * length(MODEL_MATRIX[1].xyz) * breathe,
-		INV_VIEW_MATRIX[2] * length(MODEL_MATRIX[2].xyz),
-		MODEL_MATRIX[3]
-	);
+	if (billboard_enabled) {
+		MODELVIEW_MATRIX = VIEW_MATRIX * mat4(
+			INV_VIEW_MATRIX[0] * length(MODEL_MATRIX[0].xyz) * breathe,
+			INV_VIEW_MATRIX[1] * length(MODEL_MATRIX[1].xyz) * breathe,
+			INV_VIEW_MATRIX[2] * length(MODEL_MATRIX[2].xyz),
+			MODEL_MATRIX[3]
+		);
+	} else {
+		VERTEX *= breathe;
+	}
 }
 
 void fragment() {
