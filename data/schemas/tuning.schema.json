@@ -31,7 +31,7 @@
     },
     "galaxy": {
       "type": "object",
-      "required": ["system_count", "radius", "spacing_factor", "long_edge_ratio", "safe_depth", "starbase_count", "max_bodies", "port_probability_by_tier", "system_radius"],
+      "required": ["system_count", "radius", "spacing_factor", "long_edge_ratio", "safe_depth", "starbase_count", "max_bodies", "port_probability_by_tier", "system_radius", "min_orbit_radius"],
       "additionalProperties": false,
       "properties": {
         "system_count": { "type": "integer", "minimum": 2, "description": "Systems per galaxy. Changing this (or any galaxy knob) reshapes the shard on next generation." },
@@ -47,7 +47,8 @@
           "minItems": 1,
           "description": "Chance of a trade port per system, indexed by danger tier (clamped to the last entry)."
         },
-        "system_radius": { "type": "number", "exclusiveMinimum": 0, "description": "Gameplay-space radius of a system; warp gates sit on this ring." }
+        "system_radius": { "type": "number", "exclusiveMinimum": 0, "description": "Gameplay-space radius of a system; warp gates sit on this ring." },
+        "min_orbit_radius": { "type": "number", "exclusiveMinimum": 0, "description": "Innermost body orbit. Must exceed collision.sun_radius plus the largest body so nothing generates inside the sun's exclusion zone (cross-checked by validate_data.py). Changing it is a generation change: bump GENERATION_VERSION and re-record goldens." }
       }
     },
     "warp": {
@@ -64,7 +65,7 @@
       "additionalProperties": false,
       "properties": {
         "ship_radius": { "type": "number", "exclusiveMinimum": 0, "description": "Collision circle of every ship on the XZ plane." },
-        "sun_radius": { "type": "number", "exclusiveMinimum": 0, "description": "The star's no-fly radius at the system origin. Never enterable." },
+        "sun_radius": { "type": "number", "exclusiveMinimum": 0, "description": "The star's no-fly radius at the system origin — sized to the visible fire ring, not just the ball. Never enterable. Must stay under galaxy.min_orbit_radius and world.spawn_ring_radius (cross-checked by validate_data.py)." },
         "station_radius": { "type": "number", "exclusiveMinimum": 0, "description": "Collision circle of ports and starbases (planet circles come from body size)." }
       }
     },

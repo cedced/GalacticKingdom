@@ -6,9 +6,9 @@ extends GutTest
 ## failure message prints the new hash).
 
 const GOLDEN_HASHES: Dictionary[int, String] = {
-	1: "acb60d01d5c1f7d2c6db7928efd14912dd091ed94cad2d09f4a8efa1093e7484",
-	42: "316363fce3050dc960911d7c0956b25a75fd4ba58786ee89065f5e163d48772b",
-	12345: "182f2ed31e79108d7f1a855daadf44200c2cc02d9e4cc5defba3b6559a1996fa",
+	1: "7ee0bb684152c5f08c42abc997d5ba328111b69fa3f0ab19b12be4a7183b1c98",
+	42: "13fe85dd580bfe8e43df12250e9442683950807af204a24dc7496e00e2aae70e",
+	12345: "e57229ade4e52377000f59d8f41c3b437843aa917ba3eb9fa1ee0b3a25ce0e72",
 }
 
 
@@ -23,6 +23,7 @@ func _params() -> GalaxyParams:
 	params.max_bodies = 5
 	params.port_probability_by_tier = [0.9, 0.7, 0.5, 0.4, 0.3]
 	params.system_radius = 40.0
+	params.min_orbit_radius = 13.0
 	return params
 
 
@@ -120,6 +121,10 @@ func test_bodies_are_well_formed() -> void:
 			assert_lt(
 				body.orbit_radius, _params().system_radius,
 				"body outside the gate ring in system %d" % system.id
+			)
+			assert_gt(
+				body.orbit_radius, _params().min_orbit_radius,
+				"body inside the sun's exclusion zone in system %d" % system.id
 			)
 			for richness: float in body.resources.values():
 				assert_between(richness, 0.0, 1.0)

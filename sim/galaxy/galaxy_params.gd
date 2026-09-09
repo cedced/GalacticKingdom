@@ -23,6 +23,9 @@ var port_probability_by_tier: Array[float] = []
 ## Gameplay-space radius of a system: warp gates sit on this ring and bodies
 ## orbit inside it.
 var system_radius: float = 0.0
+## Innermost body orbit; keeps everything outside the sun's exclusion zone
+## (collision.sun_radius, cross-checked by validate_data.py).
+var min_orbit_radius: float = 0.0
 
 
 static func from_tuning() -> GalaxyParams:
@@ -36,4 +39,5 @@ static func from_tuning() -> GalaxyParams:
 	params.max_bodies = Tuning.value_i("galaxy.max_bodies")
 	params.port_probability_by_tier.assign(Tuning.value("galaxy.port_probability_by_tier"))
 	params.system_radius = Tuning.value_f("galaxy.system_radius")
+	params.min_orbit_radius = Tuning.value_f("galaxy.min_orbit_radius")
 	return params

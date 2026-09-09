@@ -6,7 +6,8 @@ extends RefCounted
 
 ## Bump when generation output changes on purpose; golden hashes include it
 ## so a stale golden fails loudly instead of mysteriously.
-const GENERATION_VERSION: int = 1
+## v2: body orbits start at min_orbit_radius (sun exclusion zone).
+const GENERATION_VERSION: int = 2
 
 var seed: int = 0
 ## Indexed by system id: systems[i].id == i always holds.

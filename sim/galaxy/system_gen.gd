@@ -75,9 +75,16 @@ static func _make_body(
 	var body: SystemBody = SystemBody.new()
 	body.id = index
 	body.kind = _weighted_pick(rng, _BODY_KINDS, _BODY_KIND_WEIGHTS)
-	# Evenly spaced orbit rings with jitter, all inside the gate ring.
-	var ring_step: float = params.system_radius * 0.7 / float(body_count + 1)
-	body.orbit_radius = ring_step * float(index + 1) + rng.randf_range(-0.2, 0.2) * ring_step
+	# Evenly spaced orbit rings with jitter, between the sun's exclusion
+	# zone and the gate ring.
+	var ring_step: float = (
+		(params.system_radius * 0.7 - params.min_orbit_radius) / float(body_count + 1)
+	)
+	body.orbit_radius = (
+		params.min_orbit_radius
+		+ ring_step * float(index + 1)
+		+ rng.randf_range(-0.2, 0.2) * ring_step
+	)
 	body.orbit_angle = rng.randf() * TAU
 	var candidates: Array = _ASTEROIDS_RESOURCES
 	if body.kind == "planet":

@@ -119,6 +119,20 @@ def validate_tuning_cross_fields(errors: list[str]) -> None:
             f"data/tuning.json: world/starter_hull_id {starter!r} has no "
             f"matching data/ships/{starter}.json"
         )
+    sun = tuning.get("collision", {}).get("sun_radius", 0)
+    ship = tuning.get("collision", {}).get("ship_radius", 0)
+    min_orbit = tuning.get("galaxy", {}).get("min_orbit_radius", 0)
+    spawn_ring = tuning.get("world", {}).get("spawn_ring_radius", 0)
+    if min_orbit <= sun:
+        errors.append(
+            f"data/tuning.json: galaxy/min_orbit_radius {min_orbit} must exceed "
+            f"collision/sun_radius {sun} or bodies generate inside the sun's exclusion zone"
+        )
+    if spawn_ring <= sun + ship:
+        errors.append(
+            f"data/tuning.json: world/spawn_ring_radius {spawn_ring} must exceed "
+            f"collision/sun_radius + ship_radius {sun + ship} or ships spawn inside the sun"
+        )
 
 
 def main() -> int:

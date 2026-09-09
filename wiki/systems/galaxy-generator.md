@@ -25,7 +25,7 @@ As implemented (each numbered step draws RNG in this exact order; reordering is 
 2. Delaunay-triangulate, filter to the relative neighborhood graph (RNG ⊇ MST, so connectivity is structural), then add `long_edge_ratio` extra long lanes for loops (`build_lanes`).
 3. Home = system nearest the centroid. `danger_tier` = BFS jump depth from home plus ±1 noise (min 1 outside home; home is 0).
 4. `security = safe` for BFS depth ≤ `safe_depth`, else `lawless`.
-5. Per system, derive a child RNG via SplitMix64(seed, system.id) and generate the name, star type, bodies, and (by tier probability) a port (`SystemGen.populate`). Distribution tables (star types, biomes, biome→commodity tendencies) are consts in `system_gen.gd` until a designer needs them in data.
+5. Per system, derive a child RNG via SplitMix64(seed, system.id) and generate the name, star type, bodies, and (by tier probability) a port (`SystemGen.populate`). Body orbits span `[min_orbit_radius, 0.7 * system_radius]` so nothing generates inside the sun's no-fly zone (`collision.sun_radius` covers the visible fire ring; `validate_data.py` cross-checks the two knobs). Distribution tables (star types, biomes, biome→commodity tendencies) are consts in `system_gen.gd` until a designer needs them in data.
 6. Gates: one per lane endpoint, placed on the `system_radius` ring toward the neighbor.
 7. Starbases: home always (plus a guaranteed port there); the rest drawn from safe space with ties toward calm systems.
 8. Names come from a syllable grammar (`name_gen.gd`); the facade enforces galaxy-wide uniqueness.
@@ -37,7 +37,7 @@ Golden-seed tests: `tests/sim/test_galaxy.gd` hashes the serialized galaxy for s
 Determinism is what lets the client regenerate the whole galaxy from the seed in the server's welcome message — only mutable state ever crosses the wire.
 
 ## Tuning knobs
-`galaxy.system_count`, `galaxy.radius`, `galaxy.spacing_factor`, `galaxy.long_edge_ratio`, `galaxy.safe_depth`, `galaxy.starbase_count`, `galaxy.max_bodies`, `galaxy.port_probability_by_tier`, `galaxy.system_radius`.
+`galaxy.system_count`, `galaxy.radius`, `galaxy.spacing_factor`, `galaxy.long_edge_ratio`, `galaxy.safe_depth`, `galaxy.starbase_count`, `galaxy.max_bodies`, `galaxy.port_probability_by_tier`, `galaxy.system_radius`, `galaxy.min_orbit_radius`.
 
 ## Interactions
 - Economy reads `Body.resources` and `Station.commodity_profile` for initial supply.
