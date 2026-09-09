@@ -86,6 +86,7 @@ func _on_peer_connected(peer_id: int) -> void:
 		"fuel": session.fuel,
 		"fuel_cap": _shard.fuel_cap,
 		"fuel_per_minute": _shard.fuel_per_minute,
+		"jump_cost": _shard.jump_cost,
 	})
 	Log.info("server", "peer connected", {"peer": peer_id, "entity": session.entity_id})
 

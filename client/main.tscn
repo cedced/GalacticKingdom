@@ -1,9 +1,12 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://client/main.gd" id="1"]
 [ext_resource type="Script" path="res://client/rendering/iso_camera.gd" id="2"]
 [ext_resource type="Shader" path="res://client/rendering/grid.gdshader" id="3"]
 [ext_resource type="Script" path="res://net/rpc_surface.gd" id="4"]
+[ext_resource type="Script" path="res://client/rendering/system_view.gd" id="5"]
+[ext_resource type="Script" path="res://client/ui/hud.gd" id="6"]
+[ext_resource type="Script" path="res://client/ui/galaxy_map.gd" id="7"]
 
 [sub_resource type="ShaderMaterial" id="grid_mat"]
 shader = ExtResource("3")
@@ -39,3 +42,25 @@ mesh = SubResource("grid_mesh")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
 visible = false
 mesh = SubResource("goto_mesh")
+
+[node name="SystemView" type="Node3D" parent="."]
+script = ExtResource("5")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Hud" type="Control" parent="UI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("6")
+
+[node name="GalaxyMap" type="Control" parent="UI"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("7")

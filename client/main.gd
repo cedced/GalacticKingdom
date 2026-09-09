@@ -1,7 +1,8 @@
 class_name ClientMain
 extends Node3D
 ## Client entry point: connects to the server, sends intents, predicts the
-## local ship with the same sim/ code, and renders snapshots (ADR-002).
+## local ship with the same sim/ code, and renders snapshots (ADR-002). The
+## whole galaxy is regenerated locally from the seed in the server's welcome.
 ## Pass "-- --server=<host>" on the command line to join a remote server.
 
 const SHIP_SCENE: PackedScene = preload("res://client/scenes/ship.tscn")
@@ -16,12 +17,25 @@ var _got_first_snapshot: bool = false
 var _autopilot: AutopilotParams = null
 var _reconcile_blend: float = 0.0
 var _snap_correction_dist: float = 0.0
+var _gate_radius: float = 0.0
 var _goto_active: bool = false
 var _goto_target: Vector2 = Vector2.ZERO
+
+var _galaxy: GalaxyData = null
+var _system_id: int = -1
+## Authoritative fuel as of _fuel_updated_at; displayed with local accrual.
+var _fuel: float = 0.0
+var _fuel_updated_at: float = 0.0
+var _fuel_cap: float = 0.0
+var _fuel_per_minute: float = 0.0
+var _jump_cost: float = 0.0
 
 @onready var _camera: IsoCamera = $IsoCamera
 @onready var _goto_marker: Node3D = $GotoMarker
 @onready var _rpc: RpcSurface = $Rpc
+@onready var _system_view: SystemView = $SystemView
+@onready var _hud: Hud = $UI/Hud
+@onready var _map: GalaxyMap = $UI/GalaxyMap
 
 
 func _ready() -> void:
@@ -41,8 +55,11 @@ func _ready() -> void:
 	_autopilot = AutopilotParams.from_tuning()
 	_reconcile_blend = Tuning.value_f("net.reconcile_blend")
 	_snap_correction_dist = Tuning.value_f("net.snap_correction_dist")
+	_gate_radius = Tuning.value_f("warp.gate_radius")
 	_rpc.welcomed.connect(_on_welcomed)
 	_rpc.snapshot_received.connect(_on_snapshot_received)
+	_rpc.jumped.connect(_on_jumped)
+	_rpc.jump_denied.connect(_on_jump_denied)
 	$Sun.rotation_degrees = Vector3(-50.0, -30.0, 0.0)
 	_connect_to_server(_server_address())
 
@@ -71,16 +88,21 @@ func _resolve_intent() -> ShipIntent:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not event.is_action_pressed("go_to") or _my_state == null:
+	if event.is_action_pressed("toggle_map"):
+		_map.visible = not _map.visible
 		return
-	var mouse: InputEventMouseButton = event
-	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
-	_goto_target = Iso.screen_to_world_plane(
-		mouse.position, _camera.global_transform, _camera.size, viewport_size
-	)
-	_goto_active = true
-	_goto_marker.position = Vector3(_goto_target.x, _goto_marker.position.y, _goto_target.y)
-	_goto_marker.visible = true
+	if event.is_action_pressed("jump"):
+		_try_jump()
+		return
+	if event.is_action_pressed("go_to") and _my_state != null:
+		var mouse: InputEventMouseButton = event
+		var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+		_goto_target = Iso.screen_to_world_plane(
+			mouse.position, _camera.global_transform, _camera.size, viewport_size
+		)
+		_goto_active = true
+		_goto_marker.position = Vector3(_goto_target.x, _goto_marker.position.y, _goto_target.y)
+		_goto_marker.visible = true
 
 
 func _clear_goto() -> void:
@@ -89,9 +111,13 @@ func _clear_goto() -> void:
 
 
 func _process(_delta: float) -> void:
-	if _my_state == null:
-		return
-	if not _views.has(_my_entity_id):
+	if _galaxy != null:
+		var fuel: float = _displayed_fuel()
+		_hud.set_fuel(fuel, _fuel_cap)
+		if _map.visible:
+			_map.set_fuel_info(fuel, _jump_cost)
+	_update_gate_hint()
+	if _my_state == null or not _views.has(_my_entity_id):
 		return
 	# The predicted state updates at the 20 Hz sim tick; render through the
 	# view's blend (and follow the blended view with the camera) so the local
@@ -99,6 +125,45 @@ func _process(_delta: float) -> void:
 	var view: ShipView = _views[_my_entity_id]
 	view.set_target(_my_state.position, _my_state.heading)
 	_camera.set_target(Vector3(view.position.x, 0.0, view.position.z))
+
+
+## The server only reports fuel on change; between reports the client runs
+## the same accrual math for display. Never trusted for a jump — the server
+## re-derives fuel itself (ADR-002).
+func _displayed_fuel() -> float:
+	var elapsed: float = Time.get_unix_time_from_system() - _fuel_updated_at
+	return Galaxy.accrued_fuel(_fuel, _fuel_cap, _fuel_per_minute, elapsed)
+
+
+func _update_gate_hint() -> void:
+	var gate: WarpGate = _nearest_gate_in_range()
+	if gate == null:
+		_hud.set_hint("")
+		return
+	_hud.set_hint("J: jump to %s  (%.0f fuel)" % [
+		_galaxy.system(gate.to_system_id).name, _jump_cost,
+	])
+
+
+func _nearest_gate_in_range() -> WarpGate:
+	if _galaxy == null or _my_state == null or _system_id < 0:
+		return null
+	var best: WarpGate = null
+	var best_dist: float = _gate_radius
+	for gate: WarpGate in _galaxy.system(_system_id).gates:
+		var dist: float = _my_state.position.distance_to(gate.position)
+		if dist <= best_dist:
+			best_dist = dist
+			best = gate
+	return best
+
+
+func _try_jump() -> void:
+	var gate: WarpGate = _nearest_gate_in_range()
+	if gate == null:
+		_hud.show_message("No warp gate in range")
+		return
+	_rpc.request_jump.rpc_id(1, gate.to_system_id)
 
 
 func _connect_to_server(address: String) -> void:
@@ -135,14 +200,57 @@ func _on_server_disconnected() -> void:
 	_my_entity_id = 0
 	_my_state = null
 	_got_first_snapshot = false
-	for view: ShipView in _views.values():
-		view.queue_free()
-	_views.clear()
+	_clear_views()
 
 
 func _on_welcomed(payload: Dictionary) -> void:
 	_my_entity_id = int(payload["entity_id"])
-	Log.info("net", "welcomed", {"entity_id": _my_entity_id})
+	_fuel = float(payload["fuel"])
+	_fuel_cap = float(payload["fuel_cap"])
+	_fuel_per_minute = float(payload["fuel_per_minute"])
+	_jump_cost = float(payload["jump_cost"])
+	_fuel_updated_at = Time.get_unix_time_from_system()
+	# Deterministic generation: the seed is the entire map download.
+	_galaxy = Galaxy.generate(int(payload["galaxy_seed"]), GalaxyParams.from_tuning())
+	_map.setup(_galaxy)
+	_enter_system(int(payload["system_id"]))
+	Log.info("net", "welcomed", {
+		"entity_id": _my_entity_id, "system": _system_id, "fuel": _fuel,
+	})
+
+
+func _on_jumped(system_id: int, fuel: float) -> void:
+	_fuel = fuel
+	_fuel_updated_at = Time.get_unix_time_from_system()
+	# Drop stale views and prediction; the new room's first snapshot rebuilds
+	# them at the arrival gate.
+	_clear_views()
+	_my_state = null
+	_enter_system(system_id)
+	Log.info("net", "jumped", {"system": system_id, "fuel": fuel})
+
+
+func _on_jump_denied(reason: String, fuel: float) -> void:
+	_fuel = fuel
+	_fuel_updated_at = Time.get_unix_time_from_system()
+	_hud.show_message("Jump denied: %s" % reason)
+
+
+func _enter_system(system_id: int) -> void:
+	_system_id = system_id
+	_clear_goto()
+	var system: StarSystem = _galaxy.system(system_id)
+	_system_view.rebuild(system)
+	for gate: WarpGate in system.gates:
+		_system_view.label_gate(gate, _galaxy.system(gate.to_system_id).name)
+	_hud.set_system(system)
+	_map.set_current(system_id)
+
+
+func _clear_views() -> void:
+	for view: ShipView in _views.values():
+		view.queue_free()
+	_views.clear()
 
 
 func _on_snapshot_received(_tick_num: int, ships: Dictionary) -> void:

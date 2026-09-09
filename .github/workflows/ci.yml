@@ -60,6 +60,14 @@ jobs:
           kill $SERVER_PID
           grep -q "\[INFO\]\[net\] welcomed" client_run.log
           grep -q "\[INFO\]\[net\] first snapshot received" client_run.log
+      - name: Jump bot completes the M1 loop
+        run: |
+          godot --headless --path . --main-scene res://server/main.tscn > server_jump.log 2>&1 &
+          SERVER_PID=$!
+          sleep 3
+          timeout 90 godot --headless --path . -s tools/jump_bot.gd | tee jump_bot.log
+          kill $SERVER_PID
+          grep -q "JUMP_BOT OK" jump_bot.log
 
   # TODO(M1): headless export job. Needs export templates (~1 GB download) and
   # an export_presets.cfg; deferred until there is a build worth exporting.

@@ -33,7 +33,8 @@ func request_jump(to_system_id: int) -> void:
 ## First message after connecting: which snapshot entity is this peer's ship
 ## (entity ids are server-assigned and distinct from ENet peer ids), the
 ## galaxy seed the client regenerates the map from, and the fuel contract.
-## Keys: entity_id, galaxy_seed, system_id, fuel, fuel_cap, fuel_per_minute.
+## Keys: entity_id, galaxy_seed, system_id, fuel, fuel_cap, fuel_per_minute,
+## jump_cost.
 @rpc("authority", "call_remote", "reliable")
 func receive_welcome(payload: Dictionary) -> void:
 	welcomed.emit(payload)
