@@ -7,6 +7,12 @@ extends Node3D
 
 const SHIP_SCENE: PackedScene = preload("res://client/scenes/ship.tscn")
 const DEFAULT_SERVER_ADDRESS: String = "127.0.0.1"
+## Enter-mode contact messages until the real actions exist.
+const TOUCH_HINTS: Dictionary[String, String] = {
+	"station": "Docking arrives with M2",
+	"planet": "Landing arrives with M4",
+	"derelict": "Boarding derelicts arrives with M4",
+}
 
 var _hull: HullDef = null
 var _my_entity_id: int = 0
@@ -18,6 +24,13 @@ var _autopilot: AutopilotParams = null
 var _reconcile_blend: float = 0.0
 var _snap_correction_dist: float = 0.0
 var _gate_radius: float = 0.0
+var _ship_radius: float = 0.0
+## Enter/boarding mode (wiki/Glossary.md): planets and stations stop being
+## walls, and touching a gate jumps without pressing J. Toggled with E.
+var _enter_mode: bool = false
+var _obstacles: Array[Obstacle] = []
+var _touching: Obstacle = null
+var _auto_jump_ready_at: float = 0.0
 var _goto_active: bool = false
 var _goto_target: Vector2 = Vector2.ZERO
 ## Debug: "-- --screenshot=<path>" saves a frame shortly after the first
@@ -60,6 +73,7 @@ func _ready() -> void:
 	_reconcile_blend = Tuning.value_f("net.reconcile_blend")
 	_snap_correction_dist = Tuning.value_f("net.snap_correction_dist")
 	_gate_radius = Tuning.value_f("warp.gate_radius")
+	_ship_radius = Tuning.value_f("collision.ship_radius")
 	_rpc.welcomed.connect(_on_welcomed)
 	_rpc.snapshot_received.connect(_on_snapshot_received)
 	_rpc.jumped.connect(_on_jumped)
@@ -73,9 +87,25 @@ func _physics_process(delta: float) -> void:
 	if _my_state == null:
 		return
 	_my_intent = _resolve_intent()
-	_rpc.submit_intent.rpc_id(1, _my_intent.thrust, _my_intent.turn)
-	# Prediction: same integrator the server runs (wiki/systems/networking.md).
+	_my_intent.enter = _enter_mode
+	_rpc.submit_intent.rpc_id(1, _my_intent.thrust, _my_intent.turn, _my_intent.enter)
+	# Prediction: same integrator and walls the server runs
+	# (wiki/systems/networking.md) — unpredicted walls would rubber-band.
 	Motion.step(_my_state, _my_intent, _hull, delta)
+	_touching = Motion.resolve_obstacles(_my_state, _obstacles, _ship_radius, _enter_mode)
+	_maybe_auto_jump()
+
+
+## Enter mode's gate behavior (wiki/Glossary.md): flying into a gate jumps
+## without pressing J. Throttled so a denial does not spam the server.
+func _maybe_auto_jump() -> void:
+	if not _enter_mode or _nearest_gate_in_range() == null:
+		return
+	var now: float = Time.get_ticks_msec() / 1000.0
+	if now < _auto_jump_ready_at:
+		return
+	_auto_jump_ready_at = now + 2.0
+	_try_jump()
 
 
 ## Manual input wins and cancels the go-to; otherwise the autopilot steers.
@@ -98,6 +128,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed("jump"):
 		_try_jump()
+		return
+	if event.is_action_pressed("toggle_enter_mode"):
+		_enter_mode = not _enter_mode
+		_hud.set_boarding(_enter_mode)
 		return
 	if event.is_action_pressed("go_to") and _my_state != null:
 		var mouse: InputEventMouseButton = event
@@ -156,12 +190,16 @@ func _maybe_take_screenshot() -> void:
 
 func _update_gate_hint() -> void:
 	var gate: WarpGate = _nearest_gate_in_range()
-	if gate == null:
-		_hud.set_hint("")
+	if gate != null:
+		var how: String = "In the gate — jumping" if _enter_mode else "J: jump"
+		_hud.set_hint("%s to %s  (%.0f fuel)" % [
+			how, _galaxy.system(gate.to_system_id).name, _jump_cost,
+		])
 		return
-	_hud.set_hint("J: jump to %s  (%.0f fuel)" % [
-		_galaxy.system(gate.to_system_id).name, _jump_cost,
-	])
+	if _touching != null:
+		_hud.set_hint(TOUCH_HINTS.get(_touching.kind, ""))
+		return
+	_hud.set_hint("")
 
 
 func _nearest_gate_in_range() -> WarpGate:
@@ -263,6 +301,12 @@ func _enter_system(system_id: int) -> void:
 	_system_id = system_id
 	_clear_goto()
 	var system: StarSystem = _galaxy.system(system_id)
+	_obstacles = Galaxy.system_obstacles(
+		system,
+		Tuning.value_f("collision.sun_radius"),
+		Tuning.value_f("collision.station_radius")
+	)
+	_touching = null
 	_system_view.rebuild(system)
 	for gate: WarpGate in system.gates:
 		_system_view.label_gate(gate, _galaxy.system(gate.to_system_id).name)

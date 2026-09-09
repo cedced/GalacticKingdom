@@ -166,6 +166,22 @@ func test_jump_denial_reasons() -> void:
 	)
 
 
+func test_system_obstacles_cover_the_solid_things() -> void:
+	var galaxy: GalaxyData = Galaxy.generate(7, _params())
+	var home: StarSystem = galaxy.system(galaxy.home_system_id)
+	var obstacles: Array[Obstacle] = Galaxy.system_obstacles(home, 4.8, 2.0)
+	assert_eq(obstacles[0].kind, "sun")
+	assert_false(obstacles[0].enterable, "the sun is never enterable")
+	var expected: int = 1 + home.stations.size()
+	for body: SystemBody in home.bodies:
+		if body.kind != "asteroids":
+			expected += 1
+	assert_eq(obstacles.size(), expected, "asteroid fields and gates must not be walls")
+	for i: int in range(1, obstacles.size()):
+		assert_true(obstacles[i].enterable, "everything but the sun is enterable")
+		assert_gt(obstacles[i].radius, 0.0)
+
+
 func test_fuel_accrues_and_caps() -> void:
 	assert_almost_eq(Galaxy.accrued_fuel(10.0, 50.0, 6.0, 60.0), 16.0, 0.0001)
 	assert_eq(Galaxy.accrued_fuel(10.0, 50.0, 6.0, 36000.0), 50.0)

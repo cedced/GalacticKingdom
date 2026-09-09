@@ -79,3 +79,52 @@ func test_intent_is_clamped() -> void:
 	var intent: ShipIntent = ShipIntent.make(7.0, -9.0)
 	assert_eq(intent.thrust, 1.0)
 	assert_eq(intent.turn, -1.0)
+
+
+func test_wall_pushes_ship_out_and_slides() -> void:
+	var state: ShipState = ShipState.new()
+	state.position = Vector2(2.0, 0.5)  # Inside a radius-3 obstacle at origin.
+	state.velocity = Vector2(-4.0, 1.0)
+	var walls: Array[Obstacle] = [Obstacle.make(Vector2.ZERO, 3.0, "sun", false)]
+	var touched: Obstacle = Motion.resolve_obstacles(state, walls, 0.5, false)
+	assert_null(touched, "a wall is not a touch")
+	assert_almost_eq(state.position.length(), 3.5, 0.0001, "pushed to radius + ship radius")
+	assert_gte(
+		state.velocity.dot(state.position.normalized()), 0.0,
+		"inward velocity must be removed, tangential kept"
+	)
+	assert_gt(state.velocity.length(), 0.0, "sliding, not stopped dead")
+
+
+func test_ship_outside_obstacle_is_untouched() -> void:
+	var state: ShipState = ShipState.new()
+	state.position = Vector2(10.0, 0.0)
+	state.velocity = Vector2(-4.0, 0.0)
+	var walls: Array[Obstacle] = [Obstacle.make(Vector2.ZERO, 3.0, "sun", false)]
+	Motion.resolve_obstacles(state, walls, 0.5, false)
+	assert_eq(state.position, Vector2(10.0, 0.0))
+	assert_eq(state.velocity, Vector2(-4.0, 0.0))
+
+
+func test_enter_mode_passes_enterables_but_never_the_sun() -> void:
+	var walls: Array[Obstacle] = [
+		Obstacle.make(Vector2.ZERO, 3.0, "sun", false),
+		Obstacle.make(Vector2(20.0, 0.0), 2.0, "planet", true),
+	]
+	var state: ShipState = ShipState.new()
+	state.position = Vector2(20.5, 0.0)
+	var touched: Obstacle = Motion.resolve_obstacles(state, walls, 0.5, true)
+	assert_eq(state.position, Vector2(20.5, 0.0), "enter mode overlaps a planet freely")
+	assert_not_null(touched)
+	assert_eq(touched.kind, "planet")
+	state.position = Vector2(1.0, 0.0)
+	Motion.resolve_obstacles(state, walls, 0.5, true)
+	assert_almost_eq(state.position.length(), 3.5, 0.0001, "the sun is a wall in every mode")
+
+
+func test_dead_center_overlap_does_not_nan() -> void:
+	var state: ShipState = ShipState.new()
+	var walls: Array[Obstacle] = [Obstacle.make(Vector2.ZERO, 3.0, "sun", false)]
+	Motion.resolve_obstacles(state, walls, 0.5, false)
+	assert_true(state.position.is_finite(), "zero-distance overlap must pick a direction")
+	assert_almost_eq(state.position.length(), 3.5, 0.0001)

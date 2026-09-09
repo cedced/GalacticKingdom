@@ -8,6 +8,7 @@ const MESSAGE_SECONDS: float = 3.0
 
 var _system_label: Label = null
 var _fuel_label: Label = null
+var _mode_label: Label = null
 var _hint_label: Label = null
 var _message_label: Label = null
 var _message_until: float = 0.0
@@ -17,10 +18,16 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_system_label = _label(Vector2(16.0, 12.0), Color(0.85, 0.92, 1.0))
 	_fuel_label = _label(Vector2(16.0, 36.0), Color(0.55, 0.95, 0.75))
-	_hint_label = _label(Vector2(16.0, 64.0), Color(0.45, 0.90, 0.95))
-	_message_label = _label(Vector2(16.0, 92.0), Color(1.0, 0.55, 0.45))
+	_mode_label = _label(Vector2(16.0, 60.0), Color(0.95, 0.80, 0.35))
+	_hint_label = _label(Vector2(16.0, 88.0), Color(0.45, 0.90, 0.95))
+	_message_label = _label(Vector2(16.0, 116.0), Color(1.0, 0.55, 0.45))
+	_mode_label.text = ""
 	_hint_label.text = ""
 	_message_label.text = ""
+
+
+func set_boarding(active: bool) -> void:
+	_mode_label.text = "BOARDING MODE  (E to leave)" if active else ""
 
 
 func set_system(system: StarSystem) -> void:

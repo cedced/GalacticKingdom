@@ -11,7 +11,9 @@ const GOLDEN_ANGLE: float = 2.399963229728653
 
 var _hull: HullDef = null
 var _spawn_radius: float = 0.0
+var _ship_radius: float = 0.0
 var _intent_timeout_ticks: int = 0
+var _obstacles: Array[Obstacle] = []
 var _ships: Dictionary[int, ShipState] = {}
 var _intents: Dictionary[int, ShipIntent] = {}
 var _ticks_since_intent: Dictionary[int, int] = {}
@@ -26,9 +28,20 @@ func _ready() -> void:
 		get_tree().quit(1)
 		return
 	_spawn_radius = Tuning.value_f("world.spawn_ring_radius")
+	_ship_radius = Tuning.value_f("collision.ship_radius")
 	_intent_timeout_ticks = int(ceil(
 		Tuning.value_f("net.intent_timeout_ms") / 1000.0 * float(Tuning.value_i("net.tick_hz"))
 	))
+
+
+## Rooms are usable without a system (sim-level tests): no system means no
+## obstacles, everything else behaves the same.
+func set_system(system: StarSystem) -> void:
+	_obstacles = Galaxy.system_obstacles(
+		system,
+		Tuning.value_f("collision.sun_radius"),
+		Tuning.value_f("collision.station_radius")
+	)
 
 
 func add_ship(entity_id: int, spawn_at: Vector2 = Vector2.INF) -> void:
@@ -58,9 +71,9 @@ func is_empty() -> bool:
 	return _ships.is_empty()
 
 
-func set_intent(entity_id: int, thrust: float, turn: float) -> void:
+func set_intent(entity_id: int, thrust: float, turn: float, enter: bool) -> void:
 	if _intents.has(entity_id):
-		_intents[entity_id] = ShipIntent.make(thrust, turn)
+		_intents[entity_id] = ShipIntent.make(thrust, turn, enter)
 		_ticks_since_intent[entity_id] = 0
 
 
@@ -73,6 +86,7 @@ func step(dt: float) -> void:
 		if _ticks_since_intent[entity_id] > _intent_timeout_ticks:
 			intent = _idle_intent
 		Motion.step(_ships[entity_id], intent, _hull, dt)
+		Motion.resolve_obstacles(_ships[entity_id], _obstacles, _ship_radius, intent.enter)
 
 
 ## Full state, entity id -> ShipState.pack(). Deltas are a later optimization

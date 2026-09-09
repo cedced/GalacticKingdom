@@ -72,7 +72,9 @@ func _on_snapshot(_tick: int, ships: Dictionary) -> void:
 		_rpc.request_jump.rpc_id(1, _gate.to_system_id)
 		return
 	var intent: ShipIntent = Motion.autopilot_intent(state, _hull, _gate.position, _autopilot)
-	_rpc.submit_intent.rpc_id(1, intent.thrust, intent.turn)
+	# Boarding mode: planets between spawn and gate are not walls, so the
+	# straight-line autopilot cannot get wedged on one.
+	_rpc.submit_intent.rpc_id(1, intent.thrust, intent.turn, true)
 
 
 func _on_jumped(system_id: int, fuel: float) -> void:

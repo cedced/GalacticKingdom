@@ -28,7 +28,7 @@ func test_many_spawns_do_not_stack() -> void:
 
 func test_fresh_intent_moves_ship() -> void:
 	_room.add_ship(1)
-	_room.set_intent(1, 1.0, 0.0)
+	_room.set_intent(1, 1.0, 0.0, false)
 	_room.step(DT)
 	var state: ShipState = ShipState.unpack(_room.snapshot()[1])
 	assert_lt(state.velocity.y, 0.0, "full thrust must produce -z velocity")
@@ -37,7 +37,7 @@ func test_fresh_intent_moves_ship() -> void:
 func test_stale_intent_times_out() -> void:
 	# Regression: a frozen client's last intent used to replay forever.
 	_room.add_ship(1)
-	_room.set_intent(1, 1.0, 0.0)
+	_room.set_intent(1, 1.0, 0.0, false)
 	var timeout_ticks: int = int(ceil(
 		Tuning.value_f("net.intent_timeout_ms") / 1000.0 * float(Tuning.value_i("net.tick_hz"))
 	))
@@ -53,7 +53,7 @@ func test_stale_intent_times_out() -> void:
 func test_new_intent_resets_the_timeout() -> void:
 	_room.add_ship(1)
 	for _i: int in 100:
-		_room.set_intent(1, 1.0, 0.0)
+		_room.set_intent(1, 1.0, 0.0, false)
 		_room.step(DT)
 	assert_gt(_snapshot_speed(1), 1.0, "a live client must keep thrusting")
 

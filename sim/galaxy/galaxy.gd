@@ -29,6 +29,22 @@ static func generate(galaxy_seed: int, params: GalaxyParams) -> GalaxyData:
 	return galaxy
 
 
+## The no-fly zones of one system, for Motion.resolve_obstacles. The sun is
+## the only obstacle enter mode cannot pass; planets, derelicts, and
+## stations are enterable (contact will mean land/board/dock). Asteroid
+## fields are fields, not walls, and gates are flown into on purpose.
+static func system_obstacles(
+	system: StarSystem, sun_radius: float, station_radius: float
+) -> Array[Obstacle]:
+	var obstacles: Array[Obstacle] = [Obstacle.make(Vector2.ZERO, sun_radius, "sun", false)]
+	for body: SystemBody in system.bodies:
+		if body.kind != "asteroids":
+			obstacles.append(Obstacle.make(body.position(), body.size, body.kind, true))
+	for station: SystemStation in system.stations:
+		obstacles.append(Obstacle.make(station.position, station_radius, "station", true))
+	return obstacles
+
+
 ## "" when the jump is allowed, otherwise the denial reason shown to the
 ## player. The server is the only caller that matters (ADR-002); the client
 ## may call it for a pre-flight UI hint but never trusts its own answer.

@@ -8,7 +8,7 @@ extends Node
 ## own copy of a method simply has no listeners.
 
 ## Client -> server.
-signal intent_received(peer_id: int, thrust: float, turn: float)
+signal intent_received(peer_id: int, thrust: float, turn: float, enter: bool)
 signal jump_requested(peer_id: int, to_system_id: int)
 
 ## Server -> client.
@@ -19,8 +19,8 @@ signal jump_denied(reason: String, fuel: float)
 
 
 @rpc("any_peer", "call_remote", "unreliable_ordered")
-func submit_intent(thrust: float, turn: float) -> void:
-	intent_received.emit(multiplayer.get_remote_sender_id(), thrust, turn)
+func submit_intent(thrust: float, turn: float, enter: bool) -> void:
+	intent_received.emit(multiplayer.get_remote_sender_id(), thrust, turn, enter)
 
 
 ## Asks to jump through the current system's gate to a neighboring system.

@@ -4,7 +4,7 @@
   "title": "Gameplay tunables",
   "description": "All magic numbers used by gameplay code (CLAUDE.md Section 6). Loaded through sim/tuning.gd and read with dotted paths, e.g. Tuning.value(\"net.tick_hz\").",
   "type": "object",
-  "required": ["net", "render", "autopilot", "world", "galaxy", "warp"],
+  "required": ["net", "render", "autopilot", "world", "galaxy", "warp", "collision"],
   "additionalProperties": false,
   "properties": {
     "autopilot": {
@@ -56,6 +56,16 @@
       "additionalProperties": false,
       "properties": {
         "gate_radius": { "type": "number", "exclusiveMinimum": 0, "description": "How close a ship must be to a warp gate for the jump to be accepted." }
+      }
+    },
+    "collision": {
+      "type": "object",
+      "required": ["ship_radius", "sun_radius", "station_radius"],
+      "additionalProperties": false,
+      "properties": {
+        "ship_radius": { "type": "number", "exclusiveMinimum": 0, "description": "Collision circle of every ship on the XZ plane." },
+        "sun_radius": { "type": "number", "exclusiveMinimum": 0, "description": "The star's no-fly radius at the system origin. Never enterable." },
+        "station_radius": { "type": "number", "exclusiveMinimum": 0, "description": "Collision circle of ports and starbases (planet circles come from body size)." }
       }
     },
     "net": {

@@ -100,12 +100,12 @@ func _on_peer_disconnected(peer_id: int) -> void:
 	_sessions.erase(peer_id)
 
 
-func _on_intent_received(peer_id: int, thrust: float, turn: float) -> void:
+func _on_intent_received(peer_id: int, thrust: float, turn: float, enter: bool) -> void:
 	if not _sessions.has(peer_id):
 		return
 	var session: PlayerSession = _sessions[peer_id]
 	if _rooms.has(session.system_id):
-		_rooms[session.system_id].set_intent(session.entity_id, thrust, turn)
+		_rooms[session.system_id].set_intent(session.entity_id, thrust, turn, enter)
 
 
 func _on_jump_requested(peer_id: int, to_system_id: int) -> void:
@@ -143,6 +143,7 @@ func _room_for(system_id: int) -> SystemRoom:
 	if not _rooms.has(system_id):
 		var room: SystemRoom = SystemRoom.new()
 		room.name = "Room%d" % system_id
+		room.set_system(_galaxy.system(system_id))
 		add_child(room)
 		_rooms[system_id] = room
 		Log.info("world", "room opened", {"system": system_id})
