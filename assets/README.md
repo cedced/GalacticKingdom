@@ -1,6 +1,6 @@
 # assets/
 
-Source and import rules for every art asset in GalacticRealm. Read this before adding, moving, or renaming anything under `assets/`. `CLAUDE.md` wins on any conflict.
+Source and import rules for every art asset in GalacticKingdom. Read this before adding, moving, or renaming anything under `assets/`. `CLAUDE.md` wins on any conflict.
 
 Note for `CLAUDE.md`: `assets/` was added to the Section 3 repository layout at M0.
 

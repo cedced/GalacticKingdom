@@ -1,6 +1,6 @@
-# GalacticRealm Wiki
+# GalacticKingdom Wiki
 
-Design documentation for GalacticRealm, a persistent multiplayer space game inspired by *Starport: Galactic Empires*.
+Design documentation for GalacticKingdom, a persistent multiplayer space game inspired by *Starport: Galactic Empires*.
 
 Rules of the wiki:
 - `CLAUDE.md` at the repo root governs how code is written. This wiki governs what the game is.

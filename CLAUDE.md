@@ -2,7 +2,7 @@
 
 This file is the source of truth for how Claude works inside this repository. Read it fully before touching code. When it conflicts with a wiki page, this file wins; update the wiki, not this file, unless the project rules themselves change.
 
-Project name: **GalacticRealm**.
+Project name: **GalacticKingdom**.
 
 ## 1. What we are building
 

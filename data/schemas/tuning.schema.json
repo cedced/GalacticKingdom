@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "galacticrealm/tuning.schema.json",
+  "$id": "galactickingdom/tuning.schema.json",
   "title": "Gameplay tunables",
   "description": "All magic numbers used by gameplay code (CLAUDE.md Section 6). Loaded through sim/tuning.gd and read with dotted paths, e.g. Tuning.value(\"net.tick_hz\").",
   "type": "object",

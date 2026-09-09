@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "galacticrealm/ship.schema.json",
+  "$id": "galactickingdom/ship.schema.json",
   "title": "Hull definition",
   "description": "One hull per file under data/ships/. File name matches the id field. The model path must point at assets/ships/<id>/<id>.glb (see assets/README.md).",
   "type": "object",
