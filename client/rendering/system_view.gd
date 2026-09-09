@@ -19,6 +19,11 @@ const BACKDROP_STAR_TINT: float = 0.35
 ## is larger than the sphere it replaces.
 const PLANET_QUAD_PER_SIZE: float = 3.0
 const SUN_QUAD_SIZE: float = 13.0
+## Station sheets are cropped tight to content, so quad ~ visible size.
+## Sized around collision.station_radius 2.0; starbases read bigger and
+## rarer (wiki/Glossary.md).
+const PORT_QUAD_SIZE: float = 4.4
+const STARBASE_QUAD_SIZE: float = 5.6
 
 const STAR_COLORS: Dictionary[String, Color] = {
 	"yellow": Color(1.0, 0.84, 0.37),
@@ -123,8 +128,16 @@ func _add_body(body: SystemBody) -> void:
 
 func _add_station(station: SystemStation) -> void:
 	var is_starbase: bool = station.kind == "starbase"
-	var side: float = 3.0 if is_starbase else 2.0
 	var color: Color = COLOR_STARBASE if is_starbase else COLOR_PORT
+	var def: BodySpriteDef = BodyCatalog.for_station_kind(station.kind)
+	if def != null:
+		var quad: float = STARBASE_QUAD_SIZE if is_starbase else PORT_QUAD_SIZE
+		var sprite: MeshInstance3D = _billboard(def, color, quad)
+		sprite.position = Vector3(station.position.x, quad * 0.45, station.position.y)
+		add_child(sprite)
+		_add_label(str(station.kind), sprite.position + Vector3(0.0, quad * 0.55, 0.0))
+		return
+	var side: float = 3.0 if is_starbase else 2.0
 	var mesh: MeshInstance3D = _box(Vector3(side, side, side), color, false)
 	mesh.position = Vector3(station.position.x, side * 0.75, station.position.y)
 	mesh.rotation.y = 0.25 * PI

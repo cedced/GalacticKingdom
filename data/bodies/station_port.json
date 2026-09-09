@@ -1,0 +1,8 @@
+{
+  "id": "station_port",
+  "kind": "station",
+  "sprite_dir": "res://assets/bodies/stations/station_port",
+  "spin_speed": 0.0,
+  "tint_mix": 0.12,
+  "station_kinds": ["port"]
+}

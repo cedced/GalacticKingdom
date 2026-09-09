@@ -16,3 +16,4 @@ var corona_spread: float = 1.0
 var pulse: float = 0.0
 var biomes: Array[String] = []
 var star_types: Array[String] = []
+var station_kinds: Array[String] = []

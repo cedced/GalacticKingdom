@@ -8,7 +8,7 @@
   "additionalProperties": false,
   "properties": {
     "id": { "type": "string", "pattern": "^[a-z0-9_]+$", "description": "Must match the filename and the sprite folder name." },
-    "kind": { "enum": ["planet", "sun"] },
+    "kind": { "enum": ["planet", "sun", "station"] },
     "sprite_dir": { "type": "string", "pattern": "^res://assets/bodies/.+", "description": "Folder containing sheet.png and sheet.json." },
     "spin_speed": { "type": "number", "description": "Radians/second of shader UV rotation used when the sheet has a single frame. Sign sets direction." },
     "tint_mix": { "type": "number", "minimum": 0, "maximum": 1, "description": "0 renders the sprite untouched; 1 fully recolors its luminance with the biome/star tint." },
@@ -26,10 +26,17 @@
       "items": { "type": "string" },
       "minItems": 1,
       "description": "Sun sprites: generated star types this sprite covers."
+    },
+    "station_kinds": {
+      "type": "array",
+      "items": { "enum": ["port", "starbase"] },
+      "minItems": 1,
+      "description": "Station sprites: which station kinds this sprite draws."
     }
   },
   "allOf": [
     { "if": { "properties": { "kind": { "const": "planet" } } }, "then": { "required": ["biomes"] } },
-    { "if": { "properties": { "kind": { "const": "sun" } } }, "then": { "required": ["star_types"] } }
+    { "if": { "properties": { "kind": { "const": "sun" } } }, "then": { "required": ["star_types"] } },
+    { "if": { "properties": { "kind": { "const": "station" } } }, "then": { "required": ["station_kinds"] } }
   ]
 }

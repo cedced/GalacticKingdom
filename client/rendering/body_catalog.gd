@@ -28,6 +28,14 @@ static func for_star_type(star_type: String) -> BodySpriteDef:
 	return null
 
 
+static func for_station_kind(station_kind: String) -> BodySpriteDef:
+	_load_all()
+	for def: BodySpriteDef in _defs:
+		if def.kind == "station" and def.station_kinds.has(station_kind):
+			return def
+	return null
+
+
 static func _load_all() -> void:
 	if _loaded:
 		return
@@ -65,6 +73,7 @@ static func _load_def(path: String) -> BodySpriteDef:
 	def.pulse = float(raw.get("pulse", 0.0))
 	def.biomes.assign(raw.get("biomes", []))
 	def.star_types.assign(raw.get("star_types", []))
+	def.station_kinds.assign(raw.get("station_kinds", []))
 	return def
 
 

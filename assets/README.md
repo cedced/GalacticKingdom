@@ -16,7 +16,7 @@ Note for `CLAUDE.md`: `assets/` was added to the Section 3 repository layout at 
 |---|---|---|
 | Spaceship pack | `dump/3D_spaceships_pack/` | Numbered `.glb` files plus `.gif` previews. `34.glb` was moved out at M0 as `ships/merchant_mk1/` (see `ships/SOURCES.md`); the rest awaits M2 triage. |
 
-The planet and sun PNGs moved out at M1 into `bodies/` as single-frame sheets (see `bodies/SOURCES.md`); the client animates them with shader UV rotation until multi-angle sources exist.
+The planet, sun, and station PNGs moved out at M1 into `bodies/` as single-frame sheets (see `bodies/SOURCES.md`); the client animates the sphere stills with shader UV rotation until multi-angle sources exist, while the 3/4-angle station renders stay static. Station sprites cover both station kinds via `station_kinds` in `data/bodies/*.json`.
 
 The galaxy image moved to `backgrounds/galaxy_full.jpg` at M0. It is a 23 MB JPEG (not PNG as this file originally said), under the ~50 MB threshold, so plain git is fine — no LFS.
 
@@ -41,6 +41,10 @@ assets/
     suns/
       <sun_id>/
         sheet.png
+        sheet.json
+    stations/
+      <station_id>/         ports and starbases; same sheet convention,
+        sheet.png           but 3/4-angle renders stay static (no UV spin)
         sheet.json
   backgrounds/
     galaxy_full.jpg         master image, kept once, never edited
