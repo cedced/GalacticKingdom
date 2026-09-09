@@ -12,7 +12,8 @@
     "sprite_dir": { "type": "string", "pattern": "^res://assets/bodies/.+", "description": "Folder containing sheet.png and sheet.json." },
     "spin_speed": { "type": "number", "description": "Radians/second of shader UV rotation used when the sheet has a single frame. Sign sets direction." },
     "tint_mix": { "type": "number", "minimum": 0, "maximum": 1, "description": "0 renders the sprite untouched; 1 fully recolors its luminance with the biome/star tint." },
-    "corona": { "type": "boolean", "description": "Suns only: blend a second counter-rotating copy for a churning look." },
+    "corona": { "type": "boolean", "description": "Suns only: blend counter-rotating copies for a churning look." },
+    "corona_spread": { "type": "number", "minimum": 1, "maximum": 2, "description": "Suns only: quad size relative to the ball. Above 1 widens the fire ring around the ball without growing the ball (which stays matched to its collision circle)." },
     "pulse": { "type": "number", "minimum": 0, "maximum": 0.2, "description": "Relative scale breathing amplitude (suns)." },
     "biomes": {
       "type": "array",

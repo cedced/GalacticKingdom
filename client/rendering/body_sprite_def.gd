@@ -12,6 +12,7 @@ var fps: float = 0.0
 var spin_speed: float = 0.0
 var tint_mix: float = 0.0
 var corona: bool = false
+var corona_spread: float = 1.0
 var pulse: float = 0.0
 var biomes: Array[String] = []
 var star_types: Array[String] = []

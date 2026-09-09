@@ -5,6 +5,7 @@
   "spin_speed": 0.05,
   "tint_mix": 0.85,
   "corona": true,
+  "corona_spread": 1.4,
   "pulse": 0.03,
   "star_types": ["yellow", "orange", "red_dwarf", "white", "blue_giant", "red_giant"]
 }

@@ -85,10 +85,13 @@ func _add_star(star_type: String) -> void:
 		star.position = Vector3(0.0, 0.0, 0.0)
 		add_child(star)
 		return
-	var sprite: MeshInstance3D = _billboard(def, color, SUN_QUAD_SIZE)
+	# The quad grows with corona_spread; the ball inside it does not, so it
+	# keeps matching collision.sun_radius.
+	var quad: float = SUN_QUAD_SIZE * def.corona_spread
+	var sprite: MeshInstance3D = _billboard(def, color, quad)
 	# High enough that the camera-tilted quad never dips under the backdrop
 	# plane, which would depth-clip the corona to a straight edge.
-	sprite.position = Vector3(0.0, SUN_QUAD_SIZE * 0.45, 0.0)
+	sprite.position = Vector3(0.0, quad * 0.45, 0.0)
 	add_child(sprite)
 
 
@@ -160,6 +163,7 @@ func _billboard(def: BodySpriteDef, tint: Color, quad_size: float) -> MeshInstan
 	material.set_shader_parameter("tint", Vector3(tint.r, tint.g, tint.b))
 	material.set_shader_parameter("tint_mix", def.tint_mix)
 	material.set_shader_parameter("corona", def.corona)
+	material.set_shader_parameter("corona_spread", def.corona_spread)
 	material.set_shader_parameter("pulse", def.pulse)
 	var mesh: MeshInstance3D = MeshInstance3D.new()
 	mesh.mesh = quad

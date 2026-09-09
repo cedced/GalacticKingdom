@@ -61,6 +61,7 @@ static func _load_def(path: String) -> BodySpriteDef:
 	def.spin_speed = float(raw.get("spin_speed", 0.0))
 	def.tint_mix = float(raw.get("tint_mix", 0.0))
 	def.corona = bool(raw.get("corona", false))
+	def.corona_spread = maxf(float(raw.get("corona_spread", 1.0)), 1.0)
 	def.pulse = float(raw.get("pulse", 0.0))
 	def.biomes.assign(raw.get("biomes", []))
 	def.star_types.assign(raw.get("star_types", []))
