@@ -197,8 +197,8 @@ godot --headless --path . -s addons/gut/gut_cmdln.gd -gdir=res://tests -gexit
 # validate data against schemas
 python tools/validate_data.py
 
-# render a galaxy for a seed to PNG
-python tools/galaxy_viewer.py --seed 12345 --out /tmp/galaxy.png
+# render a galaxy for a seed to PNG (uses the real sim/galaxy code, params from data/tuning.json)
+godot --headless --path . -s tools/galaxy_viewer.gd -- --seed=12345 --out=galaxy.png
 ```
 
 Update this section whenever a script or path changes.

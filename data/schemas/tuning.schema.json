@@ -4,7 +4,7 @@
   "title": "Gameplay tunables",
   "description": "All magic numbers used by gameplay code (CLAUDE.md Section 6). Loaded through sim/tuning.gd and read with dotted paths, e.g. Tuning.value(\"net.tick_hz\").",
   "type": "object",
-  "required": ["net", "render", "autopilot", "world"],
+  "required": ["net", "render", "autopilot", "world", "galaxy"],
   "additionalProperties": false,
   "properties": {
     "autopilot": {
@@ -27,6 +27,27 @@
       "properties": {
         "starter_hull_id": { "type": "string", "pattern": "^[a-z0-9_]+$", "description": "Hull every new ship spawns with until starbases sell hulls (M2). Must match a data/ships/<id>.json file (checked by validate_data.py)." },
         "spawn_ring_radius": { "type": "number", "exclusiveMinimum": 0, "description": "Radius of the ring new ships spawn on." }
+      }
+    },
+    "galaxy": {
+      "type": "object",
+      "required": ["system_count", "radius", "spacing_factor", "long_edge_ratio", "safe_depth", "starbase_count", "max_bodies", "port_probability_by_tier", "system_radius"],
+      "additionalProperties": false,
+      "properties": {
+        "system_count": { "type": "integer", "minimum": 2, "description": "Systems per galaxy. Changing this (or any galaxy knob) reshapes the shard on next generation." },
+        "radius": { "type": "number", "exclusiveMinimum": 0, "description": "Galaxy disc radius in map units (map-space, not gameplay-space)." },
+        "spacing_factor": { "type": "number", "exclusiveMinimum": 0, "description": "Multiplier on max-packing spacing between systems; higher is more even, but relaxes if the disc cannot fit system_count." },
+        "long_edge_ratio": { "type": "number", "minimum": 0, "maximum": 1, "description": "Extra random long lanes as a fraction of the neighborhood graph's lane count." },
+        "safe_depth": { "type": "integer", "minimum": 0, "description": "Systems within this many jumps of home are safe space." },
+        "starbase_count": { "type": "integer", "minimum": 1, "description": "Starbases per galaxy; home always has one." },
+        "max_bodies": { "type": "integer", "minimum": 1, "description": "Upper bound on bodies per system." },
+        "port_probability_by_tier": {
+          "type": "array",
+          "items": { "type": "number", "minimum": 0, "maximum": 1 },
+          "minItems": 1,
+          "description": "Chance of a trade port per system, indexed by danger tier (clamped to the last entry)."
+        },
+        "system_radius": { "type": "number", "exclusiveMinimum": 0, "description": "Gameplay-space radius of a system; warp gates sit on this ring." }
       }
     },
     "net": {

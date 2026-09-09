@@ -10,25 +10,34 @@ Turn one 64-bit seed into a complete, deterministic galaxy: a graph of systems, 
 - Some systems are dead ends, some are chokepoints. Chokepoints matter for territory.
 
 ## Data model
-- `Galaxy { seed, systems: [System], lanes: [(a, b, length)] }`
-- `System { id, name, position, star_type, danger_tier, security: safe|lawless, faction_owner?, bodies: [Body], gates: [Gate], stations: [Station] }`
-- `Body { id, kind: planet|moon|asteroids|derelict, biome, size, resources: {commodity: richness}, colonizable }`
-- `Station { id, kind: port|starbase, faction, commodity_profile }`
+Implemented in `sim/galaxy/` (M1); the facade is `galaxy.gd` (`Galaxy.generate(seed, params)`).
+- `GalaxyData { seed, systems: [StarSystem], lanes: [WarpLane (a, b, length)], home_system_id }` — plus `shortest_path()` (fewest jumps), `neighbors()`, and `serialize()/content_hash()` for goldens.
+- `StarSystem { id, name, position, star_type, danger_tier, security: safe|lawless, bodies, stations, gates }` — `faction_owner` arrives with M5.
+- `SystemBody { id, kind: planet|asteroids|derelict, biome, size, resources: {commodity: richness}, colonizable, orbit_radius, orbit_angle }` — moons folded into `planet` for now; orbits are static.
+- `SystemStation { id, kind: port|starbase, position }` — `commodity_profile` arrives with M2, `faction` with M5.
+- `WarpGate { id, to_system_id, position }` — one per lane endpoint, on the `system_radius` ring, pointing map-space toward the neighbor.
+
+Positions are map-space (galaxy disc); body/station/gate positions are gameplay-space within a system. Both are XZ-plane `Vector2`s.
 
 ## Algorithms
-1. Place N system positions with Poisson disk sampling in a disc, N from tuning (default 400).
-2. Build a relative neighborhood graph, then add a few random long edges for loops. Ensure connectivity.
-3. Pick home at the centroid. Assign `danger_tier` by BFS depth from home, with noise.
-4. Mark safe space as all systems within depth D of home (default 3).
-5. Seed factions at spread-out anchor systems and flood-fill territory with decay.
-5b. Place a fixed number of paradise worlds (default 3) in mid-to-high danger systems, never adjacent to each other, never in safe space. Scatter artifacts with weight toward gas giants, tiny worlds, and dead-end systems.
-6. Per system, derive a child RNG from `hash(seed, system.id)` and generate bodies, stations, and gates. Stations placed only where population and resources justify it.
-7. Name systems with a syllable grammar seeded per system.
+As implemented (each numbered step draws RNG in this exact order; reordering is a generation change and bumps `GalaxyData.GENERATION_VERSION`):
+1. Place N positions by Poisson-like dart throwing in a disc; spacing relaxes if the disc cannot fit N (`GalaxyGraphGen.place_systems`).
+2. Delaunay-triangulate, filter to the relative neighborhood graph (RNG ⊇ MST, so connectivity is structural), then add `long_edge_ratio` extra long lanes for loops (`build_lanes`).
+3. Home = system nearest the centroid. `danger_tier` = BFS jump depth from home plus ±1 noise (min 1 outside home; home is 0).
+4. `security = safe` for BFS depth ≤ `safe_depth`, else `lawless`.
+5. Per system, derive a child RNG via SplitMix64(seed, system.id) and generate the name, star type, bodies, and (by tier probability) a port (`SystemGen.populate`). Distribution tables (star types, biomes, biome→commodity tendencies) are consts in `system_gen.gd` until a designer needs them in data.
+6. Gates: one per lane endpoint, placed on the `system_radius` ring toward the neighbor.
+7. Starbases: home always (plus a guaranteed port there); the rest drawn from safe space with ties toward calm systems.
+8. Names come from a syllable grammar (`name_gen.gd`); the facade enforces galaxy-wide uniqueness.
 
-Golden-seed tests: hash the serialized galaxy for seeds 1, 42, 12345 and assert stability. Any intentional change to generation bumps a version number and regenerates the goldens.
+Deferred: faction seeding + territory flood-fill (M5), paradise world placement and artifact scatter (M4), moons as distinct bodies.
+
+Golden-seed tests: `tests/sim/test_galaxy.gd` hashes the serialized galaxy for seeds 1, 42, 12345 with fixed explicit params (never `from_tuning`, so retuning does not move goldens). Any intentional change to generation bumps `GENERATION_VERSION` and re-records the hashes (the failing assert prints the new hash). Serialization rounds floats to 3 decimals so last-ulp platform differences cannot move the hash.
+
+Determinism is what lets the client regenerate the whole galaxy from the seed in the server's welcome message — only mutable state ever crosses the wire.
 
 ## Tuning knobs
-`galaxy.system_count`, `galaxy.safe_depth`, `galaxy.long_edge_ratio`, `galaxy.starbase_count`, `system.max_bodies`, `system.port_probability_by_tier`.
+`galaxy.system_count`, `galaxy.radius`, `galaxy.spacing_factor`, `galaxy.long_edge_ratio`, `galaxy.safe_depth`, `galaxy.starbase_count`, `galaxy.max_bodies`, `galaxy.port_probability_by_tier`, `galaxy.system_radius`.
 
 ## Interactions
 - Economy reads `Body.resources` and `Station.commodity_profile` for initial supply.
@@ -36,11 +45,15 @@ Golden-seed tests: hash the serialized galaxy for seeds 1, 42, 12345 and assert 
 - Quests read danger tiers and chokepoints for placement.
 
 ## Open questions
-- Do we generate the full galaxy at shard creation or lazily per system on first visit? Full at creation is simpler and the galaxy is small.
+- ~~Full galaxy at shard creation or lazy per system?~~ Resolved M1: full at creation — generation takes milliseconds and full data enables the map, routing, and client-side regeneration.
 - Should players be able to discover hidden lanes (wormholes) that are not in the base graph?
+- The map currently shows the whole galaxy; discovered-lanes-only ("charts you have bought or been given") needs per-player discovery state — persistence first.
 
 ## Test plan
-- Golden seeds.
-- Connectivity: every system reachable from home.
-- Distribution: danger tier histogram within expected bounds.
+Implemented in `tests/sim/test_galaxy.gd`:
+- Golden seeds (1, 42, 12345).
+- Connectivity: every system reachable from home; shortest paths only walk real lanes.
 - No two systems share a name.
+- Gates mirror lanes exactly; home has a starbase and a port; starbase count matches params and stays in safe space.
+- Bodies well-formed (kinds, biomes, richness bounds, orbits inside the gate ring).
+Open: danger tier histogram bounds.
