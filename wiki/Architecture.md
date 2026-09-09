@@ -33,7 +33,8 @@ DB           ->  server/persistence  ->  mutable state (players, colonies, price
 
 ## M0 skeleton (implemented)
 
-- `server/main.gd` boots headless, binds ENet on `net.port`, and ticks one `SystemRoom` (`server/world/system_room.gd`) at `net.tick_hz` (20) by setting `Engine.physics_ticks_per_second`.
+- `server/main.gd` boots headless, binds ENet on `net.port`, and ticks one `SystemRoom` (`server/world/system_room.gd`) at `net.tick_hz` (20) by setting `Engine.physics_ticks_per_second`. The client pins its physics rate to the same value, so prediction integrates with the server's exact dt. Both entry points abort on a failed tuning or hull load rather than run on zeroed config.
+- The starter hull is data (`world.starter_hull_id` in `data/tuning.json`), read by both sides; neither client nor server hardcodes it.
 - `sim/` gained `motion/` (shared integrator) alongside `entities/` (ShipState, ShipIntent, HullDef + loader facade), plus the cross-cutting `sim/tuning.gd` and `sim/log.gd`. All of it runs headless under GUT.
 - The client (`client/main.gd`) sends intents, predicts its own ship with the same integrator, and renders every peer in the snapshot. One room, one hull, no persistence yet — the DB layer arrives when there is state worth saving (M1 fuel/position).
 

@@ -19,7 +19,9 @@ static func heading_to(direction: Vector2) -> float:
 ## which only makes the estimate conservative. Solves
 ##   dist = v * flip_time + v^2 / (2 * accel)   for v.
 static func braking_limited_speed(hull: HullDef, dist: float) -> float:
-	if dist <= 0.0:
+	# Degenerate hulls are rejected at load, but a zero here would put
+	# PI / 0 -> NaN into every ship position; never let it through.
+	if dist <= 0.0 or hull.accel <= 0.0 or hull.turn_rate_deg <= 0.0:
 		return 0.0
 	var flip_time: float = PI / deg_to_rad(hull.turn_rate_deg)
 	var accel_flip: float = hull.accel * flip_time

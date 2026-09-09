@@ -22,8 +22,19 @@ var _goto_target: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
-	Tuning.load_data()
-	_hull = Entities.load_hull(SystemRoom.M0_HULL_ID)
+	if not Tuning.load_data():
+		Log.error("client", "tuning failed to load, aborting", {})
+		get_tree().quit(1)
+		return
+	# Prediction must integrate at the same fixed tick the server runs
+	# (CLAUDE.md Section 5); Motion.step is not dt-invariant, so a 60 Hz
+	# client fights a permanent bias against a 20 Hz server.
+	Engine.physics_ticks_per_second = Tuning.value_i("net.tick_hz")
+	_hull = Entities.load_hull(str(Tuning.value("world.starter_hull_id")))
+	if _hull == null:
+		Log.error("client", "starter hull failed to load, aborting", {})
+		get_tree().quit(1)
+		return
 	_autopilot = AutopilotParams.from_tuning()
 	$Sun.rotation_degrees = Vector3(-50.0, -30.0, 0.0)
 	_connect_to_server(_server_address())
@@ -74,9 +85,14 @@ func _process(_delta: float) -> void:
 	if _my_state == null:
 		return
 	var my_id: int = multiplayer.get_unique_id()
-	if _views.has(my_id):
-		_views[my_id].set_immediate(_my_state.position, _my_state.heading)
-	_camera.set_target(Vector3(_my_state.position.x, 0.0, _my_state.position.y))
+	if not _views.has(my_id):
+		return
+	# The predicted state updates at the 20 Hz sim tick; render through the
+	# view's blend (and follow the blended view with the camera) so the local
+	# ship stays smooth at any display rate.
+	var view: ShipView = _views[my_id]
+	view.set_target(_my_state.position, _my_state.heading)
+	_camera.set_target(Vector3(view.position.x, 0.0, view.position.z))
 
 
 func _connect_to_server(address: String) -> void:

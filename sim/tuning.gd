@@ -6,22 +6,34 @@ extends RefCounted
 const DEFAULT_PATH: String = "res://data/tuning.json"
 
 static var _data: Dictionary = {}
+static var _load_attempted: bool = false
 
 
-static func load_data(path: String = DEFAULT_PATH) -> void:
+## Returns false on failure. Entry points must check this and abort rather
+## than run on: value_i/value_f coerce missing values to 0, which once made a
+## server bind port 0 with 0 peers and still log "listening".
+static func load_data(path: String = DEFAULT_PATH) -> bool:
+	_load_attempted = true
+	_data = {}
 	var text: String = FileAccess.get_file_as_string(path)
 	if text.is_empty():
 		Log.error("tuning", "failed to read tuning file", {"path": path})
-		return
+		return false
 	var parsed: Variant = JSON.parse_string(text)
-	if parsed is Dictionary:
-		_data = parsed
-	else:
+	if not (parsed is Dictionary):
 		Log.error("tuning", "tuning file is not a JSON object", {"path": path})
+		return false
+	_data = parsed
+	return true
+
+
+static func is_loaded() -> bool:
+	return not _data.is_empty()
 
 
 static func value(dotted_path: String) -> Variant:
-	if _data.is_empty():
+	# Lazy-load once for tools/tests; a failed load is not retried per call.
+	if _data.is_empty() and not _load_attempted:
 		load_data()
 	var node: Variant = _data
 	for key: String in dotted_path.split("."):

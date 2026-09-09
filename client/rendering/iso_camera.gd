@@ -15,7 +15,9 @@ func _ready() -> void:
 	transform.basis = Iso.camera_basis(pitch, yaw)
 	_offset = transform.basis * Vector3(0.0, 0.0, Tuning.value_f("render.camera_distance"))
 	_zoom_levels = Tuning.value("render.zoom_levels")
-	_zoom_index = Tuning.value_i("render.default_zoom_index")
+	# Clamp: the schema cannot express index < zoom_levels.size(), so a
+	# data-only edit must degrade to the nearest level, not crash at boot.
+	_zoom_index = clampi(Tuning.value_i("render.default_zoom_index"), 0, _zoom_levels.size() - 1)
 	_apply_zoom()
 	set_target(Vector3.ZERO)
 

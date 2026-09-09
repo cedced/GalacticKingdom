@@ -12,6 +12,8 @@ Keep every client's view consistent with the authoritative server at playable la
 - Snapshot delta: per-entity position, velocity, facing, shields, energy, plus event list (spawn, despawn, hit, death). M0 sends full state every tick (`receive_snapshot`: tick + per-peer `PackedFloat32Array [pos_x, pos_z, heading, vel_x, vel_z]`); deltas and the event list are M1+.
 - Reliable RPCs for trade, dock, quest accept, chat.
 - M0 wiring: RPC endpoints live on the root `Main` node of both `client/main.gd` and `server/main.gd`; the two declarations must stay config-identical. Spawn/despawn is implied by peers appearing in or dropping out of the snapshot.
+- Both ends run the fixed `net.tick_hz` sim tick (client pins `Engine.physics_ticks_per_second` too); ship views blend the 20 Hz state up to display rate.
+- Dead-man's switch: an intent older than `net.intent_timeout_ms` is treated as idle, so a frozen or lossy client's ship coasts to a stop instead of burning forever.
 
 ## Algorithms
 - Client prediction for the local ship using the same `sim/` movement code. Server sends acknowledged tick; client rewinds and replays unacknowledged intents on mismatch beyond a threshold. M0 ships a simpler version: predict with `sim/motion`, blend gently toward each authoritative snapshot, hard-snap beyond `net.snap_correction_dist`. Rewind-and-replay is open.

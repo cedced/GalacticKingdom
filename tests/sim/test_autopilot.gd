@@ -101,6 +101,15 @@ func _assert_arrives_and_halts(state: ShipState, target: Vector2) -> void:
 	)
 
 
+func test_degenerate_hull_never_yields_nan() -> void:
+	# Loader rejects these, but the math must still be safe by construction.
+	var broken: HullDef = HullDef.new()  # every stat zero
+	assert_eq(Motion.braking_limited_speed(broken, 10.0), 0.0)
+	var state: ShipState = ShipState.new()
+	var intent: ShipIntent = Motion.autopilot_intent(state, broken, Vector2(10.0, 0.0), _params)
+	assert_true(is_finite(intent.thrust) and is_finite(intent.turn))
+
+
 func test_braking_limited_speed_is_monotonic_and_stops_at_zero() -> void:
 	assert_eq(Motion.braking_limited_speed(_hull, 0.0), 0.0)
 	var previous: float = 0.0

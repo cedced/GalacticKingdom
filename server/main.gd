@@ -9,7 +9,10 @@ var _tick: int = 0
 
 
 func _ready() -> void:
-	Tuning.load_data()
+	if not Tuning.load_data():
+		Log.error("server", "tuning failed to load, aborting", {})
+		get_tree().quit(1)
+		return
 	Engine.physics_ticks_per_second = Tuning.value_i("net.tick_hz")
 	_room = SystemRoom.new()
 	_room.name = "Room"

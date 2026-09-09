@@ -16,6 +16,7 @@ func before_each() -> void:
 		"max_speed": 5.0,
 		"turn_rate_deg": 90.0,
 		"drag": 0.0,
+		"cargo_slots": 8,
 	})
 
 

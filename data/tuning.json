@@ -12,7 +12,12 @@
     "port": 7777,
     "max_peers": 32,
     "interp_delay_ms": 100,
-    "snap_correction_dist": 5.0
+    "snap_correction_dist": 5.0,
+    "intent_timeout_ms": 500
+  },
+  "world": {
+    "starter_hull_id": "merchant_mk1",
+    "spawn_ring_radius": 4.0
   },
   "render": {
     "pitch_deg": 30.0,

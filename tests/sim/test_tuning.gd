@@ -19,6 +19,15 @@ func test_unknown_path_returns_null() -> void:
 	assert_null(Tuning.value("no.such.value"))
 
 
+func test_load_failure_is_reported_not_silent() -> void:
+	# A missing tuning file once let the server bind port 0 with 0 peers and
+	# still log "listening"; load_data must say it failed.
+	assert_false(Tuning.load_data("res://data/does_not_exist.json"))
+	assert_false(Tuning.is_loaded())
+	assert_true(Tuning.load_data())  # restore for the other tests
+	assert_true(Tuning.is_loaded())
+
+
 func test_zoom_levels_are_a_nonempty_array() -> void:
 	var levels: Variant = Tuning.value("render.zoom_levels")
 	assert_true(levels is Array)

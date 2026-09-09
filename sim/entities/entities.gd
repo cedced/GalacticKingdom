@@ -21,6 +21,8 @@ static func load_hull(hull_id: String) -> HullDef:
 		Log.error("entities", "hull file is not a JSON object", {"path": path})
 		return null
 	var hull: HullDef = HullDef.from_dict(parsed)
+	if hull == null:
+		return null  # already logged; not cached so a fixed file loads next call
 	_hull_cache[hull_id] = hull
 	return hull
 

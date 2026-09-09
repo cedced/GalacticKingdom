@@ -71,10 +71,33 @@ def validate_ships(errors: list[str]) -> int:
     return count
 
 
+def validate_tuning_cross_fields(errors: list[str]) -> None:
+    """Relations a JSON Schema cannot express."""
+    try:
+        tuning = load_json(DATA_DIR / "tuning.json")
+    except json.JSONDecodeError:
+        return  # already reported by validate()
+    render = tuning.get("render", {})
+    levels = render.get("zoom_levels", [])
+    index = render.get("default_zoom_index", 0)
+    if isinstance(index, int) and isinstance(levels, list) and index >= len(levels):
+        errors.append(
+            f"data/tuning.json: render/default_zoom_index {index} is out of "
+            f"range for zoom_levels (length {len(levels)})"
+        )
+    starter = tuning.get("world", {}).get("starter_hull_id", "")
+    if starter and not (DATA_DIR / "ships" / f"{starter}.json").is_file():
+        errors.append(
+            f"data/tuning.json: world/starter_hull_id {starter!r} has no "
+            f"matching data/ships/{starter}.json"
+        )
+
+
 def main() -> int:
     errors: list[str] = []
     count = 1
     validate(DATA_DIR / "tuning.json", SCHEMAS_DIR / "tuning.schema.json", errors)
+    validate_tuning_cross_fields(errors)
     count += validate_ships(errors)
     if errors:
         for line in errors:

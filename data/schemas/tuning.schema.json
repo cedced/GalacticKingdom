@@ -4,7 +4,7 @@
   "title": "Gameplay tunables",
   "description": "All magic numbers used by gameplay code (CLAUDE.md Section 6). Loaded through sim/tuning.gd and read with dotted paths, e.g. Tuning.value(\"net.tick_hz\").",
   "type": "object",
-  "required": ["net", "render", "autopilot"],
+  "required": ["net", "render", "autopilot", "world"],
   "additionalProperties": false,
   "properties": {
     "autopilot": {
@@ -20,12 +20,22 @@
         "thrust_softness": { "type": "number", "exclusiveMinimum": 0, "description": "Speed deficit (units/s) at which thrust reaches full; lower is snappier, higher is smoother." }
       }
     },
-    "net": {
+    "world": {
       "type": "object",
-      "required": ["tick_hz", "port", "max_peers", "interp_delay_ms", "snap_correction_dist"],
+      "required": ["starter_hull_id", "spawn_ring_radius"],
       "additionalProperties": false,
       "properties": {
-        "tick_hz": { "type": "integer", "minimum": 1, "description": "Server fixed sim tick rate. 20 per CLAUDE.md Section 5." },
+        "starter_hull_id": { "type": "string", "pattern": "^[a-z0-9_]+$", "description": "Hull every new ship spawns with until starbases sell hulls (M2). Must match a data/ships/<id>.json file (checked by validate_data.py)." },
+        "spawn_ring_radius": { "type": "number", "exclusiveMinimum": 0, "description": "Radius of the ring new ships spawn on." }
+      }
+    },
+    "net": {
+      "type": "object",
+      "required": ["tick_hz", "port", "max_peers", "interp_delay_ms", "snap_correction_dist", "intent_timeout_ms"],
+      "additionalProperties": false,
+      "properties": {
+        "tick_hz": { "type": "integer", "minimum": 1, "description": "Fixed sim tick rate for the server AND client prediction. 20 per CLAUDE.md Section 5." },
+        "intent_timeout_ms": { "type": "integer", "minimum": 50, "description": "A ship whose peer sends no intent for this long is treated as idle (dead-man's switch for frozen or lossy clients)." },
         "port": { "type": "integer", "minimum": 1024, "maximum": 65535 },
         "max_peers": { "type": "integer", "minimum": 1 },
         "interp_delay_ms": { "type": "integer", "minimum": 0, "description": "Remote entities render this far behind the newest snapshot." },
