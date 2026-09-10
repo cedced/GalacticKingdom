@@ -1,0 +1,7 @@
+{
+  "id": "asteroid_field",
+  "kind": "asteroids",
+  "sprite_dir": "res://assets/bodies/asteroids/asteroid_field",
+  "spin_speed": 0.0,
+  "tint_mix": 0.0
+}

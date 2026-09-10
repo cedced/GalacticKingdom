@@ -9,7 +9,7 @@ Rules of the wiki:
 
 ## Current milestone
 
-M0 Skeleton (see Roadmap.md)
+M1 Galaxy — feature-complete, pending playtest (see Roadmap.md). Seed-generated galaxy, per-system rooms, warp fuel, gate jumping, galaxy map with route plotting.
 
 ## Pages
 

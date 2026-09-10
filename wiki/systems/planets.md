@@ -4,7 +4,7 @@
 Give players something to own, grow, defend, and lose. Colonies are the main driver of rank and long-term income.
 
 ## Player-facing rules
-- Enter mode + collide with a planet = land (costs 1 warp fuel).
+- Enter mode + collide with a planet = land (costs 1 warp fuel). (M1 state: planets are solid walls outside enter mode and permeable inside it — the contact hook exists, landing itself arrives with M4.)
 - Uncolonized planets can be claimed by dropping a colony pod (bought at a starbase).
 - Planets have a biome. Nine biomes are colonizable (arctic, volcanic, desert, mountainous, greenhouse, oceanic, rocky, earthlike, paradise). Gas giants and tiny worlds are not, but can hold artifacts and sleepers.
 - Each biome sets: population growth tendency, which commodities it can produce and how fast, pollution rate, and one unique building only that biome can build.

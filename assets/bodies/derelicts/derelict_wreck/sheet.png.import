@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cqfdirfh7b3r8"
-path="res://.godot/imported/Planet.H03.2k.png-389e45b3bda40198fc684369ea42915d.ctex"
+uid="uid://cn7nyj2p58sfp"
+path="res://.godot/imported/sheet.png-35b76f666f5a0837bcc6c4b26214aefa.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/dump/Planet.H03.2k.png"
-dest_files=["res://.godot/imported/Planet.H03.2k.png-389e45b3bda40198fc684369ea42915d.ctex"]
+source_file="res://assets/bodies/derelicts/derelict_wreck/sheet.png"
+dest_files=["res://.godot/imported/sheet.png-35b76f666f5a0837bcc6c4b26214aefa.ctex"]
 
 [params]
 

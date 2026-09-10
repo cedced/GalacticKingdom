@@ -58,3 +58,23 @@ func test_make_ship_state_uses_spawn_position() -> void:
 	var state: ShipState = Entities.make_ship_state(Vector2(3.0, -2.0))
 	assert_eq(state.position, Vector2(3.0, -2.0))
 	assert_eq(state.velocity, Vector2.ZERO)
+
+
+func test_ship_state_pack_round_trips() -> void:
+	# The wire layout was once hand-decoded at five sites; the codec pair is
+	# now the only place that knows it.
+	var state: ShipState = ShipState.new()
+	state.position = Vector2(12.5, -3.25)
+	state.velocity = Vector2(-0.5, 4.0)
+	state.heading = 1.25
+	var packed: PackedFloat32Array = state.pack()
+	assert_eq(packed.size(), ShipState.PACK_STRIDE)
+	var back: ShipState = ShipState.unpack(packed)
+	assert_eq(back.position, state.position)
+	assert_eq(back.velocity, state.velocity)
+	assert_eq(back.heading, state.heading)
+
+
+func test_ship_state_unpack_rejects_bad_size() -> void:
+	assert_null(ShipState.unpack(PackedFloat32Array([1.0, 2.0])))
+	assert_null(ShipState.unpack(PackedFloat32Array()))
