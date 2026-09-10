@@ -199,6 +199,9 @@ python tools/validate_data.py
 
 # render a galaxy for a seed to PNG (uses the real sim/galaxy code, params from data/tuning.json)
 godot --headless --path . -s tools/galaxy_viewer.gd -- --seed=12345 --out=galaxy.png
+
+# intake a rendered sprite into assets/bodies (crop, clean, sheet + data stub; see assets/ART_WORKFLOW.md)
+python tools/import_body_sprite.py art.png --kind planet --id planet_lava
 ```
 
 Update this section whenever a script or path changes.

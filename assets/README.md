@@ -1,6 +1,6 @@
 # assets/
 
-Source and import rules for every art asset in GalacticKingdom. Read this before adding, moving, or renaming anything under `assets/`. `CLAUDE.md` wins on any conflict.
+Source and import rules for every art asset in GalacticKingdom. Read this before adding, moving, or renaming anything under `assets/`. `CLAUDE.md` wins on any conflict. Generating new art with AI tools: the process (style selection, prompt templates, intake) lives in `ART_WORKFLOW.md`.
 
 Note for `CLAUDE.md`: `assets/` was added to the Section 3 repository layout at M0.
 
