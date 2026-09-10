@@ -185,6 +185,11 @@ Do not start M(n+1) features while M(n) has open blocking bugs.
 ## 11. Quick commands
 
 ```
+# after pulling/merging new assets: regenerate the import cache once
+# (.godot/ is per-checkout and gitignored; skipping this makes texture
+# preloads fail and scripts that preload them load as Nil)
+godot --headless --path . --import
+
 # run headless server (dev, SQLite)
 godot --headless --path . --main-scene res://server/main.tscn
 
