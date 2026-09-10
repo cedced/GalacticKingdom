@@ -8,15 +8,14 @@ One shared look and one shared mechanism for all player-facing chrome. Controls 
 
 ## Player-facing rules
 
-- The in-flight HUD (top-left) shows hull name, connection status, position, and speed.
-- GRID checkbox toggles the reference grid (client cosmetic only).
-- HALT button cancels the go-to autopilot; it is disabled when no autopilot is running.
+- The in-flight HUD (top-left) shows the current system (name, security, danger tier) and warp fuel as a bar plus exact numbers, in a holo-styled panel.
+- Transient lines (boarding mode, gate hints, server denial messages) float below the panel as outlined text so the panel never resizes mid-flight.
 - The HUD displays only server-derived or locally predicted state; it never computes gameplay values (CLAUDE.md Section 5, no hidden state).
 
 ## Data model
 
 - `client/ui/holo_theme.tres` — the single shared `Theme`. Maps `Button` (normal/hover/pressed/disabled), `CheckBox`, `ProgressBar`, `Panel`/`PanelContainer`, and `Label` onto the Wenrexa holo textures (`assets/ui/wenrexa_holo/`, CC0, see `assets/ui/SOURCES.md`) as 9-patch `StyleBoxTexture`s.
-- `client/ui/hud.tscn` + `hud.gd` (`Hud`, a `CanvasLayer`) — the in-flight HUD. Presentation only; `ClientMain` pushes values in (`set_status`, `set_kinematics`, `set_autopilot_active`) and listens to `halt_pressed` / `grid_toggled`.
+- `client/ui/hud.gd` (`Hud`, a `Control` under `Main/UI`) — the M1 in-flight HUD, built in code. Presentation only; `ClientMain` pushes values in (`set_system`, `set_fuel`, `set_hint`, `set_boarding`, `show_message`).
 
 ## Algorithms
 
@@ -29,7 +28,8 @@ None yet. Layout margins live in the theme/scene (presentation, not gameplay; `d
 ## Interactions with other systems
 
 - `client/main.gd` owns the HUD instance and is the only writer.
-- Future screens (galaxy map M1, port/trade M2) should apply `holo_theme.tres` at their root control and extend the theme rather than overriding per node.
+- The galaxy map (`client/ui/galaxy_map.gd`) is still custom-drawn and unthemed; restyle it with `holo_theme.tres` in a follow-up.
+- Future screens (port/trade M2) should apply `holo_theme.tres` at their root control and extend the theme rather than overriding per node.
 
 ## Open questions
 
@@ -41,5 +41,5 @@ None yet. Layout margins live in the theme/scene (presentation, not gameplay; `d
 ## Test plan
 
 - Scripts lint via `--check-only`; scene load is exercised by running the client.
-- Visual check: movie-maker capture (`--write-movie <dir>/frame.png --fixed-fps 20 --quit-after 60`) against a running headless server, verified at M0+ (2026-09-09).
+- Visual check: run the client with `-- --screenshot=<path>` against a running headless server (saves a frame after the first snapshot and quits), verified 2026-09-10.
 - No GUT tests: `Hud` is presentation-only with no logic worth pinning. Add tests if the HUD ever gains formatting logic beyond string interpolation.
