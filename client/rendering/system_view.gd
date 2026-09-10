@@ -142,14 +142,12 @@ func _add_station(station: SystemStation) -> void:
 		var sprite: MeshInstance3D = _sprite_quad(def, color, quad)
 		sprite.position = Vector3(station.position.x, DECAL_HEIGHT_STATION, station.position.y)
 		add_child(sprite)
-		_add_label(str(station.kind), sprite.position + Vector3(0.0, 2.5, 0.0))
 		return
 	var side: float = 3.0 if is_starbase else 2.0
 	var mesh: MeshInstance3D = _box(Vector3(side, 0.4, side), color, false)
 	mesh.position = Vector3(station.position.x, 0.2, station.position.y)
 	mesh.rotation.y = 0.25 * PI
 	add_child(mesh)
-	_add_label(str(station.kind), mesh.position + Vector3(0.0, 2.5, 0.0))
 
 
 func _add_gate(gate: WarpGate) -> void:
@@ -163,12 +161,6 @@ func _add_gate(gate: WarpGate) -> void:
 	mesh.material_override = _material(COLOR_GATE, true)
 	mesh.position = Vector3(gate.position.x, 0.15, gate.position.y)
 	add_child(mesh)
-
-
-## Gate labels are set by the caller (destination names live in the galaxy,
-## not the gate).
-func label_gate(gate: WarpGate, text: String) -> void:
-	_add_label(text, Vector3(gate.position.x, 4.5, gate.position.y))
 
 
 ## A sprite lying flat on the play plane, stretched by 1/sin(pitch) along
@@ -229,14 +221,3 @@ func _material(color: Color, emissive: bool) -> StandardMaterial3D:
 		material.emission = color
 		material.emission_energy_multiplier = 1.2
 	return material
-
-
-func _add_label(text: String, at: Vector3) -> void:
-	var label: Label3D = Label3D.new()
-	label.text = text
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.font_size = 48
-	label.pixel_size = 0.011
-	label.modulate = Color(0.9, 0.95, 1.0, 0.9)
-	label.position = at
-	add_child(label)

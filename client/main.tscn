@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://client/main.gd" id="1"]
 [ext_resource type="Script" path="res://client/rendering/iso_camera.gd" id="2"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://client/rendering/system_view.gd" id="5"]
 [ext_resource type="Script" path="res://client/ui/hud.gd" id="6"]
 [ext_resource type="Script" path="res://client/ui/galaxy_map.gd" id="7"]
+[ext_resource type="Script" path="res://client/ui/world_labels.gd" id="8"]
 
 [sub_resource type="ShaderMaterial" id="grid_mat"]
 shader = ExtResource("3")
@@ -47,6 +48,14 @@ mesh = SubResource("goto_mesh")
 script = ExtResource("5")
 
 [node name="UI" type="CanvasLayer" parent="."]
+
+[node name="WorldLabels" type="Control" parent="UI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("8")
 
 [node name="Hud" type="Control" parent="UI"]
 anchors_preset = 15

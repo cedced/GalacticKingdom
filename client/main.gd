@@ -53,6 +53,7 @@ var _jump_cost: float = 0.0
 @onready var _system_view: SystemView = $SystemView
 @onready var _hud: Hud = $UI/Hud
 @onready var _map: GalaxyMap = $UI/GalaxyMap
+@onready var _world_labels: WorldLabels = $UI/WorldLabels
 
 
 func _ready() -> void:
@@ -78,6 +79,7 @@ func _ready() -> void:
 	_rpc.snapshot_received.connect(_on_snapshot_received)
 	_rpc.jumped.connect(_on_jumped)
 	_rpc.jump_denied.connect(_on_jump_denied)
+	_world_labels.setup(_camera)
 	$Sun.rotation_degrees = Vector3(-50.0, -30.0, 0.0)
 	_screenshot_path = _user_arg("screenshot", "")
 	_connect_to_server(_server_address())
@@ -308,8 +310,22 @@ func _enter_system(system_id: int) -> void:
 	)
 	_touching = null
 	_system_view.rebuild(system)
+	var labels: Array[Dictionary] = []
 	for gate: WarpGate in system.gates:
-		_system_view.label_gate(gate, _galaxy.system(gate.to_system_id).name)
+		labels.append({
+			"text": _galaxy.system(gate.to_system_id).name,
+			"world": gate.position,
+			"clear": 1.4,
+		})
+	for station: SystemStation in system.stations:
+		var quad: float = (
+			SystemView.STARBASE_QUAD_SIZE if station.kind == "starbase"
+			else SystemView.PORT_QUAD_SIZE
+		)
+		labels.append({
+			"text": str(station.kind), "world": station.position, "clear": quad * 0.55,
+		})
+	_world_labels.set_labels(labels)
 	_hud.set_system(system)
 	_map.set_current(system_id)
 
