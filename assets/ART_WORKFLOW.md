@@ -72,9 +72,10 @@ by type — get it wrong and the sprite cannot sit in the world.
 | Asteroid field / derelict | 3/4 view from ~30° above | "A loose cluster of asteroids" / "a wrecked derelict freighter hull" | Currently primitive fallbacks — first place new art pays off. Needs a small `SystemBody`-kind sprite hookup (ask Claude). |
 | Ship | — | — | Ships are 3D GLB models, not sprites (`README.md` Ships pipeline). AI image tools do not help here; triage the existing pack at M2. |
 
-Wanted list (in rough value order): asteroids field, derelict, lava
-planet, ringed gas giant, ice planet, red dwarf sun variant, blue giant
-sun variant, faction station variants (M5).
+Wanted list (in rough value order): lava planet, ringed gas giant, ice
+planet, red dwarf sun variant, blue giant sun variant, faction station
+variants (M5). Done 2026-09-09 (Recraft): asteroid field, derelict,
+desert planet, port, starbase.
 
 ## 4. Intake
 

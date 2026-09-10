@@ -1,0 +1,8 @@
+{
+  "id": "planet_desert",
+  "kind": "planet",
+  "sprite_dir": "res://assets/bodies/planets/planet_desert",
+  "spin_speed": 0.015,
+  "tint_mix": 0.05,
+  "biomes": ["desert"]
+}

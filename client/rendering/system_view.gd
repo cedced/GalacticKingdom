@@ -18,6 +18,10 @@ const BACKDROP_STAR_TINT: float = 0.35
 ## Sprite canvases keep a transparent margin around the ball, so the quad
 ## is larger than the sphere it replaces.
 const PLANET_QUAD_PER_SIZE: float = 3.0
+## Fields sprawl and wrecks are long; both scale off the same body.size
+## that drives their (enterable) collision circles.
+const ASTEROIDS_QUAD_PER_SIZE: float = 3.6
+const DERELICT_QUAD_PER_SIZE: float = 4.5
 const SUN_QUAD_SIZE: float = 13.0
 ## Station sheets are cropped tight to content, so quad ~ visible size.
 ## Sized around collision.station_radius 2.0; starbases read bigger and
@@ -105,15 +109,23 @@ func _add_star(star_type: String) -> void:
 
 func _add_body(body: SystemBody) -> void:
 	var pos: Vector2 = body.position()
+	var def: BodySpriteDef = null
+	var quad: float = body.size * PLANET_QUAD_PER_SIZE
+	var color: Color = Color.WHITE
 	if body.kind == "planet":
-		var def: BodySpriteDef = BodyCatalog.for_biome(body.biome)
-		var color: Color = BIOME_COLORS.get(body.biome, Color.GRAY)
-		if def != null:
-			var quad: float = body.size * PLANET_QUAD_PER_SIZE
-			var sprite: MeshInstance3D = _sprite_quad(def, color, quad)
-			sprite.position = Vector3(pos.x, DECAL_HEIGHT_BODY, pos.y)
-			add_child(sprite)
-			return
+		def = BodyCatalog.for_biome(body.biome)
+		color = BIOME_COLORS.get(body.biome, Color.GRAY)
+	elif body.kind == "asteroids":
+		def = BodyCatalog.for_kind("asteroids")
+		quad = body.size * ASTEROIDS_QUAD_PER_SIZE
+	else:
+		def = BodyCatalog.for_kind("derelict")
+		quad = body.size * DERELICT_QUAD_PER_SIZE
+	if def != null:
+		var sprite: MeshInstance3D = _sprite_quad(def, color, quad)
+		sprite.position = Vector3(pos.x, DECAL_HEIGHT_BODY, pos.y)
+		add_child(sprite)
+		return
 	var mesh: MeshInstance3D = null
 	# Primitive fallbacks hug the plane: nothing may stand tall enough to
 	# hide a ship hovering at 0.5.

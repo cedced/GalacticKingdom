@@ -4,5 +4,5 @@
   "sprite_dir": "res://assets/bodies/planets/planet_barren",
   "spin_speed": -0.015,
   "tint_mix": 0.55,
-  "biomes": ["rocky", "desert", "volcanic", "mountainous", "gas_giant", "tiny"]
+  "biomes": ["rocky", "volcanic", "mountainous", "gas_giant", "tiny"]
 }

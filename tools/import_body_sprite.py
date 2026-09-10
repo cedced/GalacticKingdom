@@ -30,7 +30,11 @@ except ImportError:  # pragma: no cover
     sys.exit(1)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-KIND_DIRS = {"planet": "planets", "sun": "suns", "station": "stations"}
+KIND_DIRS = {
+    "planet": "planets", "sun": "suns", "station": "stations",
+    "asteroids": "asteroids", "derelict": "derelicts",
+}
+# Kinds missing here (asteroids, derelict) cover their body kind directly.
 KIND_COVERAGE_FIELD = {
     "planet": ("biomes", ["earthlike"]),
     "sun": ("star_types", ["yellow"]),
@@ -55,7 +59,9 @@ def content_square(image: Image.Image, pad: float) -> np.ndarray:
     canvas[sy0 - (cy - half):sy1 - (cy - half), sx0 - (cx - half):sx1 - (cx - half)] = (
         pixels[sy0:sy1, sx0:sx1]
     )
-    canvas[canvas[:, :, 3] == 0] = 0
+    # <=4 catches generator noise floors, not just exact zero; white RGB in
+    # transparent pixels bleeds gray fringes through mipmapping.
+    canvas[canvas[:, :, 3] <= 4] = 0
     return canvas
 
 
@@ -85,15 +91,16 @@ def main() -> int:
     }
     (target_dir / "sheet.json").write_text(json.dumps(sheet) + "\n", encoding="utf-8")
 
-    field, example = KIND_COVERAGE_FIELD[args.kind]
     stub = {
         "id": args.sprite_id,
         "kind": args.kind,
         "sprite_dir": f"res://assets/bodies/{KIND_DIRS[args.kind]}/{args.sprite_id}",
-        "spin_speed": 0.02 if args.kind != "station" else 0.0,
+        "spin_speed": 0.02 if args.kind in ("planet", "sun") else 0.0,
         "tint_mix": 0.3,
-        field: example,
     }
+    if args.kind in KIND_COVERAGE_FIELD:
+        field, example = KIND_COVERAGE_FIELD[args.kind]
+        stub[field] = example
     rel = target_dir.relative_to(REPO_ROOT)
     print(f"wrote {rel}/sheet.png ({image.width}px) + sheet.json")
     print(f"\nnext steps:")

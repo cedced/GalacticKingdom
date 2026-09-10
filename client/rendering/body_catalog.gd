@@ -36,6 +36,15 @@ static func for_station_kind(station_kind: String) -> BodySpriteDef:
 	return null
 
 
+## For sprite kinds that cover a body kind directly (asteroids, derelict).
+static func for_kind(kind: String) -> BodySpriteDef:
+	_load_all()
+	for def: BodySpriteDef in _defs:
+		if def.kind == kind:
+			return def
+	return null
+
+
 static func _load_all() -> void:
 	if _loaded:
 		return

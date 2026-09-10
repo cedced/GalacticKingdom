@@ -1,0 +1,7 @@
+{
+  "id": "derelict_wreck",
+  "kind": "derelict",
+  "sprite_dir": "res://assets/bodies/derelicts/derelict_wreck",
+  "spin_speed": 0.0,
+  "tint_mix": 0.0
+}
