@@ -19,6 +19,8 @@ var _goto_target: Vector2 = Vector2.ZERO
 
 @onready var _camera: IsoCamera = $IsoCamera
 @onready var _goto_marker: Node3D = $GotoMarker
+@onready var _grid: Node3D = $Grid
+@onready var _hud: Hud = $Hud
 
 
 func _ready() -> void:
@@ -37,6 +39,10 @@ func _ready() -> void:
 		return
 	_autopilot = AutopilotParams.from_tuning()
 	$Sun.rotation_degrees = Vector3(-50.0, -30.0, 0.0)
+	_hud.set_hull_name(_hull.display_name)
+	_hud.set_status("connecting")
+	_hud.halt_pressed.connect(_clear_goto)
+	_hud.grid_toggled.connect(func(grid_visible: bool) -> void: _grid.visible = grid_visible)
 	_connect_to_server(_server_address())
 
 
@@ -74,11 +80,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	_goto_active = true
 	_goto_marker.position = Vector3(_goto_target.x, _goto_marker.position.y, _goto_target.y)
 	_goto_marker.visible = true
+	_hud.set_autopilot_active(true)
 
 
 func _clear_goto() -> void:
 	_goto_active = false
 	_goto_marker.visible = false
+	_hud.set_autopilot_active(false)
 
 
 func _process(_delta: float) -> void:
@@ -93,6 +101,7 @@ func _process(_delta: float) -> void:
 	var view: ShipView = _views[my_id]
 	view.set_target(_my_state.position, _my_state.heading)
 	_camera.set_target(Vector3(view.position.x, 0.0, view.position.z))
+	_hud.set_kinematics(_my_state.position, _my_state.velocity.length(), _hull.max_speed)
 
 
 func _connect_to_server(address: String) -> void:
@@ -118,14 +127,17 @@ func _server_address() -> String:
 
 func _on_connected() -> void:
 	Log.info("net", "connected", {"peer_id": multiplayer.get_unique_id()})
+	_hud.set_status("online")
 
 
 func _on_connection_failed() -> void:
 	Log.error("net", "connection failed", {})
+	_hud.set_status("connection failed")
 
 
 func _on_server_disconnected() -> void:
 	Log.warn("net", "server disconnected", {})
+	_hud.set_status("offline")
 	_my_state = null
 	_got_first_snapshot = false
 	for view: ShipView in _views.values():

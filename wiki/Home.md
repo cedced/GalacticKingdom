@@ -28,6 +28,7 @@ M0 Skeleton (see Roadmap.md)
 - [Rendering (3D to Isometric)](systems/rendering.md)
 - [Networking](systems/networking.md)
 - [Ships and Equipment](systems/ships.md)
+- [UI (theme and HUD)](systems/ui.md)
 
 ### Decisions
 - [ADR-001 Engine and stack](adr/001-engine-and-stack.md)

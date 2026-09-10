@@ -17,6 +17,7 @@ Note for `CLAUDE.md`: `assets/` was added to the Section 3 repository layout at 
 | Spaceship pack | `dump/3D_spaceships_pack/` | Numbered `.glb` files plus `.gif` previews. `34.glb` was moved out at M0 as `ships/merchant_mk1/` (see `ships/SOURCES.md`); the rest awaits M2 triage. |
 | Planet sprites | `dump/` | 2 PNGs, single angle each. Cannot become rotation sheets without multi-angle source renders (see Open questions). |
 | Sun sprite | `dump/` | 1 PNG, single angle. Same limitation. |
+| Wenrexa UI ZIPs 3–5 | `dump/` | Icon libraries (potions, RPG/military weapons + SVG sources, spell/skill icons) from the same CC0 pack as `ui/wenrexa_holo/` (see `ui/SOURCES.md`). ~33 MB, each icon duplicated across sizes/colors. Not referenced by anything yet; triage at M2 (shop/commodity icons) and M3 (weapon icons — prefer the SVG sources in ZIP 4). ZIPs 1–2 are fully imported into `ui/wenrexa_holo/` and safe to delete from dump. |
 
 The galaxy image moved to `backgrounds/galaxy_full.jpg` at M0. It is a 23 MB JPEG (not PNG as this file originally said), under the ~50 MB threshold, so plain git is fine — no LFS.
 
@@ -46,7 +47,11 @@ assets/
     galaxy_full.jpg         master image, kept once, never edited
     systems/
       <region_id>.png       crops used as skybox/backdrop per region
-  ui/                       icons, cursors, HUD atlas (empty until M1)
+  ui/
+    SOURCES.md              third-party pack provenance and file mapping
+    wenrexa_holo/           holographic UI chrome: buttons (4 states), panels,
+                            cards, checkbox, progress bar, slider, 35 flat icons.
+                            CC0, see SOURCES.md. Not yet referenced by a scene.
   vfx/                      projectile, explosion, warp textures (empty until M3)
   audio/                    empty until scoped
 ```
@@ -129,4 +134,5 @@ Rules:
 - [ ] Export planet and sun angle sets, build sheets and `sheet.json` (blocked: single-angle sources, see Open questions; needed by M1)
 - [x] Move galaxy master, decide on LFS (M0: 23 MB JPEG, plain git, no LFS)
 - [ ] Write `tools/backdrop_crop.py` and add it to `CLAUDE.md` Section 11 (M1)
+- [ ] Triage Wenrexa icon ZIPs 3–5 in `dump/` at M2/M3 (import the needed icons only, prefer ZIP 4's SVG sources)
 - [ ] Delete `dump/` when empty

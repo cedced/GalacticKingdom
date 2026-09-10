@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://client/main.gd" id="1"]
 [ext_resource type="Script" path="res://client/rendering/iso_camera.gd" id="2"]
 [ext_resource type="Shader" path="res://client/rendering/grid.gdshader" id="3"]
+[ext_resource type="PackedScene" path="res://client/ui/hud.tscn" id="4"]
 
 [sub_resource type="ShaderMaterial" id="grid_mat"]
 shader = ExtResource("3")
@@ -35,3 +36,5 @@ mesh = SubResource("grid_mesh")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
 visible = false
 mesh = SubResource("goto_mesh")
+
+[node name="Hud" parent="." instance=ExtResource("4")]
