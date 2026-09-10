@@ -21,39 +21,35 @@ ask Claude to take it from there.
 
 ## 1. Style round — identifying the style
 
-Run once before generating in bulk (this also settles the open
-pixel-vs-painterly decision in `wiki/systems/rendering.md`):
+**Settled 2026-09-09: pre-rendered painterly realism** (recorded in
+`wiki/systems/rendering.md`; also resolves pixel-vs-painterly — native
+resolution, linear filtering). The incumbent user-provided renders
+already match; nothing needs regenerating.
 
-1. Pick ONE test subject we already have in game (suggestion: a desert
-   planet) so candidates are comparable against real neighbors.
-2. Generate the same subject in 2–4 candidate styles, e.g.:
-   - **Pre-rendered painterly realism** — what the current user-provided
-     renders already are; the de-facto incumbent.
-   - **Stylized painterly** (hand-painted look, chunky shapes, rim light).
-   - **Pixel art** (would also flip the renderer to nearest-neighbor
-     upscale, see rendering wiki — a bigger commitment).
-3. Claude intakes all candidates side by side into a throwaway system
-   view and screenshots them next to ships, stations, and the backdrop.
-4. Pick one. Record the decision in `wiki/systems/rendering.md`, and
-   freeze the winning wording into the Style block below.
-5. Regenerate existing assets only if they clash; the incumbent renders
-   already pass as "pre-rendered painterly realism".
+Re-run a style round only if the direction is ever reopened: same test
+subject in 2–4 candidate styles, `tools/style_board.gd` for an in-game
+side-by-side, record the new decision in the rendering wiki, update the
+Style block below.
 
 ## 2. The style block
 
 Paste this at the front of EVERY generation prompt, then append the
-asset prompt. Fill the first line after the style round locks it.
+asset prompt.
 
 ```
-STYLE: <locked at style round — until then: pre-rendered painterly sci-fi
-realism, detailed surfaces, subtle color grading, no outlines>
-Single centered object on a fully transparent background.
+STYLE: photorealistic pre-rendered sci-fi art, detailed surfaces,
+subtle color grading, physically plausible materials, no outlines.
+Single centered object on a plain pure black background, nothing else
+in frame (true transparency also fine if the tool supports it).
 Square canvas, 2048x2048 or larger.
 Lit from the upper left, neutral white key light, deep shadows.
 No text, no watermark, no frame, no border, no drop shadow,
 no lens flare, no background stars or nebulae.
 Muted deep-space palette; accent colors allowed on the object itself.
 ```
+
+A pure black background is fine: intake keys it out (most generators
+cannot produce real alpha).
 
 Hard technical constraints baked into that block (do not relax them):
 - **Transparent background** — the intake tool crops by alpha; a baked

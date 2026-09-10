@@ -121,7 +121,7 @@ Rules:
 
 ## Open questions
 
-- Pixel look vs. painterly look. Blocks filter settings on every import. Tracked in `wiki/systems/rendering.md`.
+- ~~Pixel look vs. painterly look~~ — decided 2026-09-09: pre-rendered painterly realism, linear filtering, native resolution (`wiki/systems/rendering.md`).
 - License terms of `3D_spaceships_pack` AND the body sprites (`bodies/SOURCES.md`). Confirm redistribution is allowed before anything ships in a build.
 - ~~Whether suns need rotation at all or a shader-driven shimmer is enough~~ — resolved M1: the two-layer counter-rotating shader shimmer reads well; real sheets remain optional polish.
 - The body sprites are single-angle renders. True rotation sheets need N-angle exports; find the original 3D sources or a tool to re-render them. The shader-spin interim is acceptable until then.

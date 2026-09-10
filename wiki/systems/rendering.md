@@ -29,7 +29,7 @@ Present the 3D world as a fixed-angle isometric scene that reads clearly, runs o
 - UI depends on `iso.gd` for targeting reticles, map pins, and damage numbers.
 
 ## Open questions
-- Pixel vs. painterly. Decide by M1 with a side-by-side test scene.
+- ~~Pixel vs. painterly~~ — **decided 2026-09-09: pre-rendered painterly realism.** Render at native resolution, linear texture filtering, no pixel-snap pipeline. All AI-generated art follows the locked style block in `assets/ART_WORKFLOW.md`; the user-provided renders already match.
 - Whether ships tilt on turns (cosmetic roll) given the fixed camera.
 
 ## Test plan
