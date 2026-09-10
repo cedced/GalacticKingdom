@@ -87,9 +87,9 @@ void fragment() {
 	// pow keeps the haze to sparse wisps instead of an even wash.
 	float haze = pow(fbm((world_xz - cam * 0.5) * 0.02 + star_seed), 3.0);
 	vec3 col = base_color + nebula_color * haze * nebula_intensity;
-	float faint = star_layer(p_far + vec2(19.1, 71.3), 2.6, 0.09, 0.35, 0.0);
-	float mid = star_layer(p_mid, 5.5, 0.17, 0.30, 0.10);
-	float bright = star_layer(p_near + vec2(53.7, 17.3), 12.0, 0.34, 0.45, 0.22);
+	float faint = star_layer(p_far + vec2(19.1, 71.3), 2.6, 0.05, 0.35, 0.0);
+	float mid = star_layer(p_mid, 5.5, 0.10, 0.30, 0.10);
+	float bright = star_layer(p_near + vec2(53.7, 17.3), 12.0, 0.19, 0.45, 0.22);
 	col += vec3(0.72, 0.80, 0.95) * faint * 0.30;
 	col += vec3(0.85, 0.90, 1.00) * mid * 0.75;
 	col += vec3(1.00, 0.96, 0.88) * min(bright, 1.2);
