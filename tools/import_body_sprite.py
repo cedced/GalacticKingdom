@@ -10,7 +10,7 @@ Does everything the pipeline requires (assets/ART_WORKFLOW.md step 4):
   fringes through mipmapping),
 - caps the canvas at --max-size (default 2048),
 - writes assets/bodies/<kind>s/<id>/sheet.png + a 1-frame sheet.json,
-- prints the data/bodies/<id>.json stub and the SOURCES.md reminder.
+- prints the data/bodies/<id>.json stub and the manifest-row reminder.
 
 Needs Pillow and numpy (dev tool only; CI never runs it).
 """
@@ -106,8 +106,8 @@ def main() -> int:
     print(f"\nnext steps:")
     print(f"1. create data/bodies/{args.sprite_id}.json (adjust coverage/tint/spin):")
     print(json.dumps(stub, indent=2))
-    print(f"2. add a provenance row to assets/bodies/SOURCES.md "
-          f"(original: {args.source.name})")
+    print(f"2. add or update the data/assets/manifest.json row for {args.sprite_id!r} "
+          f"(status: wired, original: {args.source.name})")
     print("3. python tools/validate_data.py, then re-import in Godot and screenshot")
     return 0
 

@@ -199,8 +199,11 @@ godot --path . --main-scene res://client/main.tscn
 # run all tests
 godot --headless --path . -s addons/gut/gut_cmdln.gd -gdir=res://tests -gexit
 
-# validate data against schemas
+# validate data against schemas and assets against the manifest
 python tools/validate_data.py
+
+# self-test the asset manifest check (pure Python, no Godot)
+python -m unittest discover -s tests/tools
 
 # render a galaxy for a seed to PNG (uses the real sim/galaxy code, params from data/tuning.json)
 godot --headless --path . -s tools/galaxy_viewer.gd -- --seed=12345 --out=galaxy.png

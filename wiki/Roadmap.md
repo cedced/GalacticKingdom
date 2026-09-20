@@ -23,7 +23,7 @@ matters; each step is its own small PR.
 
 | # | Step | Done when |
 |---|---|---|
-| 1 | Manifest: `data/schemas/asset_manifest.schema.json`, `data/assets/manifest.json` seeded with the 13 existing rows + the wanted list, assets check in `tools/validate_data.py`, CI step, `tests/tools/` fixture test, `SOURCES.md` files deleted, `assets/README.md` layout updated | CI green with the gate on; an orphan file under `assets/` fails CI |
+| 1 | Manifest: `data/schemas/asset_manifest.schema.json`, `data/assets/manifest.json` seeded with the 11 existing rows + the wanted list, assets check in `tools/validate_data.py`, CI step, `tests/tools/` fixture test, `SOURCES.md` files deleted, `assets/README.md` layout updated | CI green with the gate on; an orphan file under `assets/` fails CI. **Done 2026-09-20.** |
 | 2 | Higgsfield MCP connected (user signs in), first sprite through the full loop: lava planet, two image models A/B'd, house model recorded | `planet_lava` wired, screenshot verified |
 | 3 | Ship pipeline proof: one concept sheet (trader hull) → bake-off Hunyuan3D local vs Higgsfield `image_to_3d`/`tripo_3d` → `tools/normalize_hull.py` (Blender 5.2 headless) → GLB beside `merchant_mk1` | Tool chosen and written into ADR-004, ADR flipped to Accepted; second hull renders in-game |
 | 4 | M2 debt row: server names hull at spawn, client renders `HullDef.model` | Two different hulls visible in one system |

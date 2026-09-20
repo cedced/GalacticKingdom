@@ -9,3 +9,6 @@ exports/
 # Local editor cruft
 *.tmp
 *.bak
+
+# Python tool caches
+__pycache__/

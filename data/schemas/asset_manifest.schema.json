@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "galactickingdom/asset_manifest.schema.json",
+  "title": "Asset manifest",
+  "description": "Single source of truth for every file under assets/: what is wanted, what exists, where it came from, and under which license (ADR-004, wiki/systems/asset-pipeline.md). One row per asset; a row's path may name a file or a directory that it covers by prefix. tools/validate_data.py enforces that every file under assets/ (except dump/, *.import, *.md, .gitkeep) is covered by exactly one wired row.",
+  "type": "object",
+  "required": ["assets"],
+  "additionalProperties": false,
+  "properties": {
+    "assets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/asset" }
+    }
+  },
+  "$defs": {
+    "asset": {
+      "type": "object",
+      "required": ["id", "kind", "status", "milestone", "source", "license"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$",
+          "description": "Unique across the manifest. Matches the data/ id where one exists (planet_lava, merchant_mk1)."
+        },
+        "kind": {
+          "enum": ["ship", "planet", "sun", "station", "asteroid", "derelict", "vfx", "icon", "portrait", "ui_pack", "sfx", "music", "texture", "font", "background"]
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^res://assets/[a-z0-9_/.]+$",
+          "description": "File or directory under assets/. Required once wired; for earlier statuses it is the intended destination."
+        },
+        "status": {
+          "enum": ["wanted", "generated", "approved", "wired", "replaced"],
+          "description": "wanted (shopping list) -> generated (candidates in dump/gen/) -> approved (user picked one) -> wired (in assets/, referenced) -> replaced (kept for history)."
+        },
+        "milestone": {
+          "type": "string",
+          "pattern": "^(sprint|M[0-9])$"
+        },
+        "source": {
+          "type": "object",
+          "required": ["provider"],
+          "additionalProperties": false,
+          "properties": {
+            "provider": { "enum": ["higgsfield", "hunyuan3d", "envato", "recraft", "user", "pack", "derived"] },
+            "model": { "type": "string", "description": "Generator model id (Higgsfield model name) or tool version." },
+            "prompt": { "type": "string", "description": "Full prompt including the style block, or the search that found an Envato item." },
+            "seed": { "type": "integer" },
+            "job_id": { "type": "string", "description": "Generator job id; kept even after the account deletes the generation." },
+            "date": { "type": "string", "format": "date" },
+            "parent_id": { "type": "string", "pattern": "^[a-z0-9_]+$", "description": "derived rows: the manifest id this was cut or extracted from." },
+            "original_filename": { "type": "string" },
+            "item_url": { "type": "string", "format": "uri" }
+          }
+        },
+        "license": {
+          "type": "object",
+          "required": ["status"],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": ["verified", "unknown", "pending"],
+              "description": "verified: terms read and recorded. pending: provider known, terms not yet confirmed. unknown: provenance itself is unknown."
+            },
+            "terms": { "type": "string", "description": "One line, e.g. 'Higgsfield ToU: outputs owned, commercial OK' or 'CC0'." },
+            "registered_project": { "type": "string", "description": "Envato only: the project the download was registered to." }
+          }
+        },
+        "cost_credits": { "type": "number", "minimum": 0 },
+        "notes": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "wired" } } },
+          "then": { "required": ["path"] }
+        },
+        {
+          "if": { "properties": { "license": { "properties": { "status": { "const": "verified" } }, "required": ["status"] } } },
+          "then": { "properties": { "license": { "required": ["terms"] } } }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": { "const": "wired" },
+              "source": { "properties": { "provider": { "const": "envato" } }, "required": ["provider"] }
+            }
+          },
+          "then": { "properties": { "license": { "required": ["registered_project"] } } }
+        },
+        {
+          "if": { "properties": { "source": { "properties": { "provider": { "const": "derived" } }, "required": ["provider"] } } },
+          "then": { "properties": { "source": { "required": ["parent_id"] } } }
+        }
+      ]
+    }
+  }
+}

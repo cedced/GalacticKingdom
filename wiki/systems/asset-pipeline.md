@@ -72,9 +72,10 @@ or a directory (a sprite-sheet folder, a hull folder, a whole UI pack).
 
 Rules:
 - Schema first, then rows, then the validator (CLAUDE.md §7.4).
-- The manifest replaces `assets/*/SOURCES.md`; those files are deleted once
-  their rows are migrated (13 rows today: 1 hull, 8 bodies, 1 UI pack, 1
-  galaxy master, plus the two unused Recraft variants as `replaced`).
+- The manifest replaced `assets/*/SOURCES.md` on 2026-09-20 (11 rows: 1
+  hull, 8 bodies, 1 UI pack, 1 galaxy master; rejected candidates are
+  named in the winner's `notes`, not given rows). The Wenrexa per-file
+  rename log survives as `assets/ui/wenrexa_holo/RENAMES.md`.
 - `wanted` rows are the shopping list. Adding a milestone's asset needs
   means adding `wanted` rows, nothing else.
 

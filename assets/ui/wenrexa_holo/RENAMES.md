@@ -1,12 +1,10 @@
-﻿# assets/ui/ sources
+# wenrexa_holo rename log
 
-## wenrexa_holo/
-
-- **Pack**: Free UI Hologram Interface (parts 1 and 2 of the 5-ZIP download set)
-- **Author**: Wenrexa
-- **Source**: https://wenrexa.itch.io/holoui
-- **License**: Creative Commons Zero v1.0 Universal (CC0), per the asset-license field on the itch.io page (verified 2026-09-09). No attribution required; credit Wenrexa in-game anyway.
-- **Import**: folder and file names converted to snake_case; content untouched. ZIPs 3-5 from the same page (potion, RPG/military, spell icons) are staged in `assets/dump/`, not imported.
+Provenance and license for this pack live in `data/assets/manifest.json`
+(row `wenrexa_holo`: Wenrexa, https://wenrexa.itch.io/holoui, CC0). This
+file only records how each original file was renamed on import so a
+PNG can be traced back to the ZIP it came from. Names were converted to
+snake_case; content untouched.
 
 | Pack ZIP | Original path | Imported as |
 |---|---|---|

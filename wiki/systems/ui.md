@@ -14,7 +14,7 @@ One shared look and one shared mechanism for all player-facing chrome. Controls 
 
 ## Data model
 
-- `client/ui/holo_theme.tres` — the single shared `Theme`. Maps `Button` (normal/hover/pressed/disabled), `CheckBox`, `ProgressBar`, `Panel`/`PanelContainer`, and `Label` onto the Wenrexa holo textures (`assets/ui/wenrexa_holo/`, CC0, see `assets/ui/SOURCES.md`) as 9-patch `StyleBoxTexture`s.
+- `client/ui/holo_theme.tres` — the single shared `Theme`. Maps `Button` (normal/hover/pressed/disabled), `CheckBox`, `ProgressBar`, `Panel`/`PanelContainer`, and `Label` onto the Wenrexa holo textures (`assets/ui/wenrexa_holo/`, CC0, manifest row `wenrexa_holo`) as 9-patch `StyleBoxTexture`s.
 - `client/ui/hud.gd` (`Hud`, a `Control` under `Main/UI`) — the M1 in-flight HUD, built in code. Presentation only; `ClientMain` pushes values in (`set_system`, `set_fuel`, `set_hint`, `set_boarding`, `show_message`).
 
 ## Algorithms

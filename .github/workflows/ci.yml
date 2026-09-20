@@ -20,6 +20,8 @@ jobs:
           python-version: "3.12"
       - run: pip install jsonschema
       - run: python tools/validate_data.py
+      - name: Asset manifest check self-test
+        run: python -m unittest discover -s tests/tools
 
   lint:
     name: GDScript lint
