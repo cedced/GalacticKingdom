@@ -8,6 +8,19 @@ Note for `CLAUDE.md`: `assets/` was added to the Section 3 repository layout at 
 
 `assets/` holds the raw and cleaned art that `client/` loads. Nothing in `sim/` or `server/` may reference this directory; the server is headless and never needs art. Gameplay data (hull stats, weapon numbers) stays in `data/*.json`. Data files point at asset paths; asset files never carry gameplay values.
 
+## Sourcing policy (2026-09-20)
+
+How assets get made is ADR-004 (`wiki/adr/004-asset-sourcing.md`) and
+`wiki/systems/asset-pipeline.md`; the hands-on loop is `ART_WORKFLOW.md`.
+Short form: Higgsfield generates everything bespoke (ships via
+image-to-3D, bodies, VFX, icons, portraits, SFX); Envato Elements
+supplies non-diegetic material only (music, fonts, textures, footage);
+`data/assets/manifest.json` is the provenance record and replaces the
+per-folder `SOURCES.md` tables once the asset sprint lands (Roadmap.md).
+New folders the sprint adds: `dump/gen/`, `dump/envato/`,
+`ships/<id>/concept/`, `vfx/<id>/`, `ui/icons/`, `ui/portraits/`,
+`audio/sfx/`, `audio/music/` (layout in the pipeline page).
+
 ## Current state: `assets/dump/`
 
 `dump/` is an unsorted staging area. Nothing in it is referenced by a scene yet. Contents as of this file:

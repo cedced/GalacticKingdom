@@ -14,6 +14,38 @@ Each milestone ends with a playable build and a written test session.
 
 Cut scope before slipping a milestone. Cut polish before cutting a pillar.
 
+## Asset sprint (between M1 and M2)
+
+Decided 2026-09-20 (ADR-004, `wiki/systems/asset-pipeline.md`). One
+focused pass so M2 onward can list asset rows instead of inventing a
+process. Not a milestone: no playable-means row, no new gameplay. Order
+matters; each step is its own small PR.
+
+| # | Step | Done when |
+|---|---|---|
+| 1 | Manifest: `data/schemas/asset_manifest.schema.json`, `data/assets/manifest.json` seeded with the 13 existing rows + the wanted list, assets check in `tools/validate_data.py`, CI step, `tests/tools/` fixture test, `SOURCES.md` files deleted, `assets/README.md` layout updated | CI green with the gate on; an orphan file under `assets/` fails CI |
+| 2 | Higgsfield MCP connected (user signs in), first sprite through the full loop: lava planet, two image models A/B'd, house model recorded | `planet_lava` wired, screenshot verified |
+| 3 | Ship pipeline proof: one concept sheet (trader hull) → bake-off Hunyuan3D local vs Higgsfield `image_to_3d`/`tripo_3d` → `tools/normalize_hull.py` (Blender 5.2 headless) → GLB beside `merchant_mk1` | Tool chosen and written into ADR-004, ADR flipped to Accepted; second hull renders in-game |
+| 4 | M2 debt row: server names hull at spawn, client renders `HullDef.model` | Two different hulls visible in one system |
+| 5 | M2 batch: two more hulls (light fighter, freighter), eight commodity icons, port master portrait, gas giant + ice planet, red dwarf + blue giant suns | All rows `wired`, contact sheet of icons reviewed |
+| 6 | Rotation-sheet experiment on one planet via orbit video + `tools/frames_from_clip.py`; keep or kill | Decision recorded in the pipeline page; `assets/README.md` 32-angle target kept or removed |
+| 7 | Envato: project "GalacticKingdom" registered, flow proven once (three music slots: safe space, lawless, docked; one UI font), `tools/import_audio.py` | Tracks play from a test scene, rows `wired` with registration date |
+| 8 | Manifest `wanted` rows seeded for M3–M6 (table below) | Rows exist; nothing generated |
+
+Deferred to their milestones: SFX generation (M3, needs `tools/import_audio.py` from step 7 and a test scene), VFX (M3), encrypted PCK on release exports (needs export presets, M2+).
+
+### Per-milestone asset rows
+
+Each milestone plan pulls these into `wanted` rows before its features start.
+
+| Milestone | Assets |
+|---|---|
+| M2 Trade | 3 hulls (trader, light fighter, freighter), 8 commodity icons, ship-class icons, port master + starbase quartermaster portraits, port/starbase screen backdrops, 3 music slots, UI click/confirm/error SFX |
+| M3 Combat | VFX sheets: laser bolt, cannon shell, small/large explosion, shield hit, warp in/out, engine flame; SFX: 2 weapons, 2 explosions, shield hit, warp, engine loop per class; 2–3 alien NPC hulls, 1 turret model, death/respawn screen art |
+| M4 Planets | Planet surface view per biome (8 at most, tint-shared), building icons, colony screen art, invasion VFX, colony ambience loop |
+| M5 Living world | Faction emblems, faction station variants (re-tint first), envoy portraits (Soul ID if recurring), quest board icons, event banners |
+| M6 Social | Corp emblem template, rank medals (Rebang), leaderboard frame, chat channel icons |
+
 ## Carried debt (from the 2026-09 M0 code review)
 
 Each known issue is assigned to the milestone that must absorb it. Do not start a milestone's features while its debt rows are open (CLAUDE.md Section 10).

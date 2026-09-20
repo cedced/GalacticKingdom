@@ -9,7 +9,7 @@ Rules of the wiki:
 
 ## Current milestone
 
-M1 Galaxy — feature-complete, pending playtest (see Roadmap.md). Seed-generated galaxy, per-system rooms, warp fuel, gate jumping, galaxy map with route plotting.
+M1 Galaxy — feature-complete, pending playtest (see Roadmap.md). Next: the asset sprint (Roadmap.md) before M2. Seed-generated galaxy, per-system rooms, warp fuel, gate jumping, galaxy map with route plotting.
 
 ## Pages
 
@@ -29,8 +29,10 @@ M1 Galaxy — feature-complete, pending playtest (see Roadmap.md). Seed-generate
 - [Networking](systems/networking.md)
 - [Ships and Equipment](systems/ships.md)
 - [UI (theme and HUD)](systems/ui.md)
+- [Asset Pipeline (generation, sourcing, intake)](systems/asset-pipeline.md)
 
 ### Decisions
 - [ADR-001 Engine and stack](adr/001-engine-and-stack.md)
 - [ADR-002 Server-authoritative simulation](adr/002-server-authoritative.md)
 - [ADR-003 Isometric presentation of a 3D world](adr/003-isometric-3d.md)
+- [ADR-004 Asset sourcing and generation policy](adr/004-asset-sourcing.md)
