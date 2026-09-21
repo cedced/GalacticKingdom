@@ -192,9 +192,13 @@
       "path": "res://assets/bodies/planets/planet_lava",
       "status": "wanted",
       "milestone": "sprint",
-      "source": { "provider": "higgsfield" },
-      "license": { "status": "pending" },
-      "notes": "Sprint step 2: first asset through the Claude-driven loop; A/B two image models to pick the house model for planets."
+      "source": {
+        "provider": "gemini"
+      },
+      "license": {
+        "status": "pending"
+      },
+      "notes": "Sprint step 2: first asset through the Claude-driven loop; A/B Nano Banana 2 vs Pro to pick the house model for planets."
     },
     {
       "id": "merchant_mk2",
@@ -202,9 +206,13 @@
       "path": "res://assets/ships/merchant_mk2",
       "status": "wanted",
       "milestone": "sprint",
-      "source": { "provider": "higgsfield" },
-      "license": { "status": "pending" },
-      "notes": "Sprint step 3 bake-off hull: concept sheet -> Hunyuan3D local vs Higgsfield image_to_3d/tripo_3d -> normalize_hull.py. Mid-tier trader, boxy silhouette."
+      "source": {
+        "provider": "gemini"
+      },
+      "license": {
+        "status": "pending"
+      },
+      "notes": "Sprint step 3 proof hull: Gemini concept sheet -> Hunyuan3D local -> normalize_hull.py. Mid-tier trader, boxy silhouette."
     },
     {
       "id": "interceptor_mk1",
@@ -212,8 +220,12 @@
       "path": "res://assets/ships/interceptor_mk1",
       "status": "wanted",
       "milestone": "M2",
-      "source": { "provider": "higgsfield" },
-      "license": { "status": "pending" },
+      "source": {
+        "provider": "gemini"
+      },
+      "license": {
+        "status": "pending"
+      },
       "notes": "Light fighter, wedge silhouette. No baked weapons."
     },
     {
@@ -222,8 +234,12 @@
       "path": "res://assets/ships/hauler_mk1",
       "status": "wanted",
       "milestone": "M2",
-      "source": { "provider": "higgsfield" },
-      "license": { "status": "pending" },
+      "source": {
+        "provider": "gemini"
+      },
+      "license": {
+        "status": "pending"
+      },
       "notes": "Freighter, long silhouette, big cargo hold."
     },
     {
@@ -232,8 +248,12 @@
       "path": "res://assets/bodies/planets/planet_gas_giant",
       "status": "wanted",
       "milestone": "M2",
-      "source": { "provider": "higgsfield" },
-      "license": { "status": "pending" },
+      "source": {
+        "provider": "gemini"
+      },
+      "license": {
+        "status": "pending"
+      },
       "notes": "Ringed. Rings break the UV-spin trick; evaluate a ring-less variant if the spin looks wrong."
     },
     {
@@ -242,8 +262,12 @@
       "path": "res://assets/bodies/planets/planet_ice",
       "status": "wanted",
       "milestone": "M2",
-      "source": { "provider": "higgsfield" },
-      "license": { "status": "pending" }
+      "source": {
+        "provider": "gemini"
+      },
+      "license": {
+        "status": "pending"
+      }
     },
     {
       "id": "sun_red_dwarf",
@@ -251,8 +275,12 @@
       "path": "res://assets/bodies/suns/sun_red_dwarf",
       "status": "wanted",
       "milestone": "M2",
-      "source": { "provider": "higgsfield" },
-      "license": { "status": "pending" }
+      "source": {
+        "provider": "gemini"
+      },
+      "license": {
+        "status": "pending"
+      }
     },
     {
       "id": "sun_blue_giant",
@@ -260,8 +288,12 @@
       "path": "res://assets/bodies/suns/sun_blue_giant",
       "status": "wanted",
       "milestone": "M2",
-      "source": { "provider": "higgsfield" },
-      "license": { "status": "pending" }
+      "source": {
+        "provider": "gemini"
+      },
+      "license": {
+        "status": "pending"
+      }
     },
     {
       "id": "icon_metal_ore",
@@ -269,8 +301,12 @@
       "path": "res://assets/ui/icons/commodities/metal_ore.png",
       "status": "wanted",
       "milestone": "M2",
-      "source": { "provider": "higgsfield" },
-      "license": { "status": "pending" },
+      "source": {
+        "provider": "gemini"
+      },
+      "license": {
+        "status": "pending"
+      },
       "notes": "Commodity icon set: generate all eight in one sitting so they match."
     },
     {
@@ -279,8 +315,12 @@
       "path": "res://assets/ui/icons/commodities/anaerobes.png",
       "status": "wanted",
       "milestone": "M2",
-      "source": { "provider": "higgsfield" },
-      "license": { "status": "pending" }
+      "source": {
+        "provider": "gemini"
+      },
+      "license": {
+        "status": "pending"
+      }
     },
     {
       "id": "icon_medicine",
@@ -288,8 +328,12 @@
       "path": "res://assets/ui/icons/commodities/medicine.png",
       "status": "wanted",
       "milestone": "M2",
-      "source": { "provider": "higgsfield" },
-      "license": { "status": "pending" }
+      "source": {
+        "provider": "gemini"
+      },
+      "license": {
+        "status": "pending"
+      }
     },
     {
       "id": "icon_organics",
@@ -297,8 +341,12 @@
       "path": "res://assets/ui/icons/commodities/organics.png",
       "status": "wanted",
       "milestone": "M2",
-      "source": { "provider": "higgsfield" },
-      "license": { "status": "pending" }
+      "source": {
+        "provider": "gemini"
+      },
+      "license": {
+        "status": "pending"
+      }
     },
     {
       "id": "icon_oil",
@@ -306,8 +354,12 @@
       "path": "res://assets/ui/icons/commodities/oil.png",
       "status": "wanted",
       "milestone": "M2",
-      "source": { "provider": "higgsfield" },
-      "license": { "status": "pending" }
+      "source": {
+        "provider": "gemini"
+      },
+      "license": {
+        "status": "pending"
+      }
     },
     {
       "id": "icon_uranium",
@@ -315,8 +367,12 @@
       "path": "res://assets/ui/icons/commodities/uranium.png",
       "status": "wanted",
       "milestone": "M2",
-      "source": { "provider": "higgsfield" },
-      "license": { "status": "pending" }
+      "source": {
+        "provider": "gemini"
+      },
+      "license": {
+        "status": "pending"
+      }
     },
     {
       "id": "icon_equipment",
@@ -324,8 +380,12 @@
       "path": "res://assets/ui/icons/commodities/equipment.png",
       "status": "wanted",
       "milestone": "M2",
-      "source": { "provider": "higgsfield" },
-      "license": { "status": "pending" }
+      "source": {
+        "provider": "gemini"
+      },
+      "license": {
+        "status": "pending"
+      }
     },
     {
       "id": "icon_spice",
@@ -333,8 +393,12 @@
       "path": "res://assets/ui/icons/commodities/spice.png",
       "status": "wanted",
       "milestone": "M2",
-      "source": { "provider": "higgsfield" },
-      "license": { "status": "pending" }
+      "source": {
+        "provider": "gemini"
+      },
+      "license": {
+        "status": "pending"
+      }
     },
     {
       "id": "portrait_port_master",
@@ -342,8 +406,12 @@
       "path": "res://assets/ui/portraits/port_master.png",
       "status": "wanted",
       "milestone": "M2",
-      "source": { "provider": "higgsfield" },
-      "license": { "status": "pending" },
+      "source": {
+        "provider": "gemini"
+      },
+      "license": {
+        "status": "pending"
+      },
       "notes": "Bust on black, neutral expression, reads at 64px in the trade screen."
     },
     {
@@ -352,8 +420,12 @@
       "path": "res://assets/audio/music/safe_space.ogg",
       "status": "wanted",
       "milestone": "sprint",
-      "source": { "provider": "envato" },
-      "license": { "status": "pending" },
+      "source": {
+        "provider": "envato"
+      },
+      "license": {
+        "status": "pending"
+      },
       "notes": "Sprint step 7: calm ambient for police-controlled systems. Register to Envato project 'GalacticKingdom'."
     },
     {
@@ -362,8 +434,12 @@
       "path": "res://assets/audio/music/lawless.ogg",
       "status": "wanted",
       "milestone": "sprint",
-      "source": { "provider": "envato" },
-      "license": { "status": "pending" },
+      "source": {
+        "provider": "envato"
+      },
+      "license": {
+        "status": "pending"
+      },
       "notes": "Tense, low, for lawless space."
     },
     {
@@ -372,8 +448,12 @@
       "path": "res://assets/audio/music/docked.ogg",
       "status": "wanted",
       "milestone": "sprint",
-      "source": { "provider": "envato" },
-      "license": { "status": "pending" },
+      "source": {
+        "provider": "envato"
+      },
+      "license": {
+        "status": "pending"
+      },
       "notes": "Port and starbase screens."
     },
     {
@@ -382,8 +462,12 @@
       "path": "res://assets/ui/fonts/ui.ttf",
       "status": "wanted",
       "milestone": "sprint",
-      "source": { "provider": "envato" },
-      "license": { "status": "pending" },
+      "source": {
+        "provider": "envato"
+      },
+      "license": {
+        "status": "pending"
+      },
       "notes": "One UI face for the holo theme; check the Envato font license allows embedding in a game."
     }
   ]

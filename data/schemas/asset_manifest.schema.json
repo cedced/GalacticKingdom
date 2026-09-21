@@ -44,11 +44,11 @@
           "required": ["provider"],
           "additionalProperties": false,
           "properties": {
-            "provider": { "enum": ["higgsfield", "hunyuan3d", "envato", "recraft", "user", "pack", "derived"] },
-            "model": { "type": "string", "description": "Generator model id (Higgsfield model name) or tool version." },
+            "provider": { "enum": ["gemini", "hunyuan3d", "envato", "recraft", "user", "pack", "derived"] },
+            "model": { "type": "string", "description": "Generator model id (Gemini model name such as gemini-3.1-flash-image) or tool version." },
             "prompt": { "type": "string", "description": "Full prompt including the style block, or the search that found an Envato item." },
             "seed": { "type": "integer" },
-            "job_id": { "type": "string", "description": "Generator job id; kept even after the account deletes the generation." },
+            "job_id": { "type": "string", "description": "Provider job/operation id where one exists (Veo operations)." },
             "date": { "type": "string", "format": "date" },
             "parent_id": { "type": "string", "pattern": "^[a-z0-9_]+$", "description": "derived rows: the manifest id this was cut or extracted from." },
             "original_filename": { "type": "string" },
@@ -64,11 +64,11 @@
               "enum": ["verified", "unknown", "pending"],
               "description": "verified: terms read and recorded. pending: provider known, terms not yet confirmed. unknown: provenance itself is unknown."
             },
-            "terms": { "type": "string", "description": "One line, e.g. 'Higgsfield ToU: outputs owned, commercial OK' or 'CC0'." },
+            "terms": { "type": "string", "description": "One line, e.g. 'Gemini API paid tier: outputs owned, no training, SynthID' or 'CC0'." },
             "registered_project": { "type": "string", "description": "Envato only: the project the download was registered to." }
           }
         },
-        "cost_credits": { "type": "number", "minimum": 0 },
+        "cost_usd": { "type": "number", "minimum": 0, "description": "List-price cost of every generation the row consumed, candidates included." },
         "notes": { "type": "string" }
       },
       "allOf": [

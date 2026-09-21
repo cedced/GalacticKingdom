@@ -12,9 +12,10 @@ Note for `CLAUDE.md`: `assets/` was added to the Section 3 repository layout at 
 
 How assets get made is ADR-004 (`wiki/adr/004-asset-sourcing.md`) and
 `wiki/systems/asset-pipeline.md`; the hands-on loop is `ART_WORKFLOW.md`.
-Short form: Higgsfield generates everything bespoke (ships via
-image-to-3D, bodies, VFX, icons, portraits, SFX); Envato Elements
-supplies non-diegetic material only (music, fonts, textures, footage);
+Short form: Google Gemini models generate everything bespoke (Nano Banana
+for bodies, icons, portraits, ship concepts; Veo for VFX clips), Hunyuan3D
+runs locally for hull geometry; Envato Elements supplies non-diegetic
+material and audio (music, SFX, fonts, textures, footage);
 `data/assets/manifest.json` is the provenance record (one row per asset:
 source, prompt, license); it replaced the per-folder `SOURCES.md` tables on
 2026-09-20. `tools/validate_data.py` fails when a file under `assets/` has
@@ -41,7 +42,7 @@ Rule: `dump/` is read-only in spirit. Move things out, never build on them in pl
 assets/
   README.md                 you are here
   dump/                     staging, never referenced by a scene
-    gen/<manifest_id>/      Higgsfield candidates awaiting the user's pick
+    gen/<manifest_id>/      Gemini candidates awaiting the user's pick
     envato/<item_slug>/     user downloads + license certificate awaiting intake
   ships/
     <hull_id>/
@@ -95,7 +96,7 @@ assets/
 
 Format is GLB (Godot 4 native glTF import, see `CLAUDE.md` Section 2).
 
-1. Pick a hull (from a Higgsfield concept via image-to-3D per `ART_WORKFLOW.md`, or, until the sprint replaces them, from `dump/3D_spaceships_pack/`). Add the manifest row with the original filename or job id.
+1. Pick a hull (from a Gemini concept sheet via local Hunyuan3D per `ART_WORKFLOW.md`, or, until the sprint replaces them, from `dump/3D_spaceships_pack/`). Add the manifest row with the original filename or job id.
 2. Copy to `assets/ships/<hull_id>/<hull_id>.glb`. Do not rename inside `dump/`.
 3. Open in Godot, check: Y-up, forward is -Z, origin at the hull's center of mass, scale so the starter ship is roughly 1 unit long. Fix in Blender and re-export if wrong; do not fix with transforms in the scene tree.
 4. In the import dock: set to Scene, keep materials, no lightmap UVs. If the pack ships a texture set, keep it embedded.
