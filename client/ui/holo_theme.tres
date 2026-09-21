@@ -1,0 +1,111 @@
+[gd_resource type="Theme" load_steps=18 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/wenrexa_holo/button_1/button_normal.png" id="1_btn_n"]
+[ext_resource type="Texture2D" path="res://assets/ui/wenrexa_holo/button_1/button_hover.png" id="2_btn_h"]
+[ext_resource type="Texture2D" path="res://assets/ui/wenrexa_holo/button_1/button_active.png" id="3_btn_p"]
+[ext_resource type="Texture2D" path="res://assets/ui/wenrexa_holo/button_1/button_disable.png" id="4_btn_d"]
+[ext_resource type="Texture2D" path="res://assets/ui/wenrexa_holo/card_x4/panel_border_1.png" id="5_panel"]
+[ext_resource type="Texture2D" path="res://assets/ui/wenrexa_holo/checkbox/checkbox_true.png" id="6_chk_t"]
+[ext_resource type="Texture2D" path="res://assets/ui/wenrexa_holo/checkbox/checkbox_false.png" id="7_chk_f"]
+[ext_resource type="Texture2D" path="res://assets/ui/wenrexa_holo/checkbox/checkbox_disabled.png" id="8_chk_d"]
+[ext_resource type="Texture2D" path="res://assets/ui/wenrexa_holo/progressbar/progressbar_background.png" id="9_pb_bg"]
+[ext_resource type="Texture2D" path="res://assets/ui/wenrexa_holo/progressbar/progressbarforeground.png" id="10_pb_fg"]
+
+[sub_resource type="StyleBoxTexture" id="sbt_btn_normal"]
+content_margin_left = 18.0
+content_margin_top = 8.0
+content_margin_right = 18.0
+content_margin_bottom = 8.0
+texture = ExtResource("1_btn_n")
+texture_margin_left = 14.0
+texture_margin_top = 12.0
+texture_margin_right = 14.0
+texture_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="sbt_btn_hover"]
+content_margin_left = 18.0
+content_margin_top = 8.0
+content_margin_right = 18.0
+content_margin_bottom = 8.0
+texture = ExtResource("2_btn_h")
+texture_margin_left = 14.0
+texture_margin_top = 12.0
+texture_margin_right = 14.0
+texture_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="sbt_btn_pressed"]
+content_margin_left = 18.0
+content_margin_top = 8.0
+content_margin_right = 18.0
+content_margin_bottom = 8.0
+texture = ExtResource("3_btn_p")
+texture_margin_left = 14.0
+texture_margin_top = 12.0
+texture_margin_right = 14.0
+texture_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="sbt_btn_disabled"]
+content_margin_left = 18.0
+content_margin_top = 8.0
+content_margin_right = 18.0
+content_margin_bottom = 8.0
+texture = ExtResource("4_btn_d")
+texture_margin_left = 14.0
+texture_margin_top = 12.0
+texture_margin_right = 14.0
+texture_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxEmpty" id="sbe_focus"]
+
+[sub_resource type="StyleBoxTexture" id="sbt_panel"]
+content_margin_left = 24.0
+content_margin_top = 16.0
+content_margin_right = 24.0
+content_margin_bottom = 18.0
+texture = ExtResource("5_panel")
+texture_margin_left = 20.0
+texture_margin_top = 20.0
+texture_margin_right = 20.0
+texture_margin_bottom = 20.0
+
+[sub_resource type="StyleBoxTexture" id="sbt_pb_bg"]
+texture = ExtResource("9_pb_bg")
+texture_margin_left = 11.0
+texture_margin_top = 9.0
+texture_margin_right = 11.0
+texture_margin_bottom = 9.0
+
+[sub_resource type="StyleBoxTexture" id="sbt_pb_fill"]
+texture = ExtResource("10_pb_fg")
+texture_margin_left = 11.0
+texture_margin_top = 9.0
+texture_margin_right = 11.0
+texture_margin_bottom = 9.0
+
+[resource]
+Button/colors/font_color = Color(0.62, 0.96, 0.89, 1)
+Button/colors/font_disabled_color = Color(0.29, 0.42, 0.39, 1)
+Button/colors/font_hover_color = Color(0.84, 1, 0.97, 1)
+Button/colors/font_pressed_color = Color(0.43, 0.91, 0.8, 1)
+Button/styles/disabled = SubResource("sbt_btn_disabled")
+Button/styles/focus = SubResource("sbe_focus")
+Button/styles/hover = SubResource("sbt_btn_hover")
+Button/styles/normal = SubResource("sbt_btn_normal")
+Button/styles/pressed = SubResource("sbt_btn_pressed")
+CheckBox/colors/font_color = Color(0.62, 0.96, 0.89, 1)
+CheckBox/colors/font_disabled_color = Color(0.29, 0.42, 0.39, 1)
+CheckBox/colors/font_hover_color = Color(0.84, 1, 0.97, 1)
+CheckBox/icons/checked = ExtResource("6_chk_t")
+CheckBox/icons/checked_disabled = ExtResource("8_chk_d")
+CheckBox/icons/unchecked = ExtResource("7_chk_f")
+CheckBox/icons/unchecked_disabled = ExtResource("8_chk_d")
+CheckBox/styles/disabled = SubResource("sbe_focus")
+CheckBox/styles/focus = SubResource("sbe_focus")
+CheckBox/styles/hover = SubResource("sbe_focus")
+CheckBox/styles/normal = SubResource("sbe_focus")
+CheckBox/styles/pressed = SubResource("sbe_focus")
+Label/colors/font_color = Color(0.75, 0.93, 0.9, 1)
+Panel/styles/panel = SubResource("sbt_panel")
+PanelContainer/styles/panel = SubResource("sbt_panel")
+ProgressBar/styles/background = SubResource("sbt_pb_bg")
+ProgressBar/styles/fill = SubResource("sbt_pb_fill")

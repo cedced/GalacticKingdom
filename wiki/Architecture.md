@@ -23,6 +23,8 @@ sim/      pure rules, no engine nodes, runs on both
 
 One server process hosts N systems. Each system is an independent room. Jumping moves the player entity between rooms. Cross-system data (economy, factions, quests) lives in a galaxy-level service that rooms read from.
 
+Implemented (M1): `server/main.gd` generates the shard's galaxy at boot (`Galaxy.generate(shard.seed, params)`), opens a `SystemRoom` lazily when a ship enters a system, and frees it when the last ship leaves. Per-peer state that outlives a room (entity id, current system, warp fuel as value+timestamp) lives in `PlayerSession`. Snapshots go per room, only to the peers in that room — the first, coarsest form of interest management.
+
 ## Data flow
 
 ```

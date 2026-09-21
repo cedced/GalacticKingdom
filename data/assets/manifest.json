@@ -1,0 +1,474 @@
+{
+  "assets": [
+    {
+      "id": "merchant_mk1",
+      "kind": "ship",
+      "path": "res://assets/ships/merchant_mk1",
+      "status": "wired",
+      "milestone": "M0",
+      "source": {
+        "provider": "pack",
+        "original_filename": "3D_spaceships_pack/34.glb"
+      },
+      "license": {
+        "status": "unknown",
+        "terms": "unknown pack, author unknown; replace when a licensed hull beats it (ADR-004)"
+      },
+      "notes": "Root rotated 180 deg around +Y at source because the pack faces +Z (glTF forward is -Z). Origin at hull base, not center of mass. Folder also holds the two textures the GLB references."
+    },
+    {
+      "id": "planet_terran",
+      "kind": "planet",
+      "path": "res://assets/bodies/planets/planet_terran",
+      "status": "wired",
+      "milestone": "M1",
+      "source": {
+        "provider": "user",
+        "original_filename": "Planet.H03.2k.png"
+      },
+      "license": {
+        "status": "unknown",
+        "terms": "unknown pack, user-provided render"
+      },
+      "notes": "Single-angle pole-on still, animated by shader UV spin. Covers earthlike, oceanic, greenhouse, arctic via tint."
+    },
+    {
+      "id": "planet_barren",
+      "kind": "planet",
+      "path": "res://assets/bodies/planets/planet_barren",
+      "status": "wired",
+      "milestone": "M1",
+      "source": {
+        "provider": "user",
+        "original_filename": "Mercury Planet.H03.2k.png"
+      },
+      "license": {
+        "status": "unknown",
+        "terms": "unknown pack, user-provided render"
+      }
+    },
+    {
+      "id": "sun_giant",
+      "kind": "sun",
+      "path": "res://assets/bodies/suns/sun_giant",
+      "status": "wired",
+      "milestone": "M1",
+      "source": {
+        "provider": "user",
+        "original_filename": "Sun 05 Yellow Star Giant.E03.2k.png"
+      },
+      "license": {
+        "status": "unknown",
+        "terms": "unknown pack, user-provided render"
+      },
+      "notes": "One sun covers all star types through corona_spread and tint."
+    },
+    {
+      "id": "planet_desert",
+      "kind": "planet",
+      "path": "res://assets/bodies/planets/planet_desert",
+      "status": "wired",
+      "milestone": "M1",
+      "source": {
+        "provider": "recraft",
+        "prompt": "STYLE block + 'A single desert planet, full disc, ochre dunes and dry seabeds'",
+        "date": "2026-09-09",
+        "original_filename": "dump/gen/desert-planet.png"
+      },
+      "license": {
+        "status": "pending",
+        "terms": "Recraft free tier; commercial terms not yet confirmed"
+      },
+      "notes": "Exact prompt text was not recorded at generation; the prompt field is the ART_WORKFLOW table seed it was built from."
+    },
+    {
+      "id": "station_port",
+      "kind": "station",
+      "path": "res://assets/bodies/stations/station_port",
+      "status": "wired",
+      "milestone": "M1",
+      "source": {
+        "provider": "recraft",
+        "prompt": "STYLE block + 'A trading port space station, three-quarter view from slightly above'",
+        "date": "2026-09-09",
+        "original_filename": "dump/gen/space-station.png"
+      },
+      "license": {
+        "status": "pending",
+        "terms": "Recraft free tier; commercial terms not yet confirmed"
+      },
+      "notes": "Replaced the unknown-license 'Futuristic Sci Fi Space Station.G03.2k.png' render. Static 3/4 view; cropped to a content-centered square so the sprite center matches the collision circle."
+    },
+    {
+      "id": "station_starbase",
+      "kind": "station",
+      "path": "res://assets/bodies/stations/station_starbase",
+      "status": "wired",
+      "milestone": "M1",
+      "source": {
+        "provider": "recraft",
+        "prompt": "STYLE block + 'A large military starbase, three-quarter view from slightly above'",
+        "date": "2026-09-09",
+        "original_filename": "dump/gen/star-station.png"
+      },
+      "license": {
+        "status": "pending",
+        "terms": "Recraft free tier; commercial terms not yet confirmed"
+      },
+      "notes": "Replaced the unknown-license 'White Space Station.G03.2k.png' render."
+    },
+    {
+      "id": "asteroid_field",
+      "kind": "asteroid",
+      "path": "res://assets/bodies/asteroids/asteroid_field",
+      "status": "wired",
+      "milestone": "M1",
+      "source": {
+        "provider": "recraft",
+        "prompt": "STYLE block + 'A loose cluster of asteroids, three-quarter view from slightly above'",
+        "date": "2026-09-09",
+        "original_filename": "dump/gen/asteroid-2.png"
+      },
+      "license": {
+        "status": "pending",
+        "terms": "Recraft free tier; commercial terms not yet confirmed"
+      },
+      "notes": "Candidate asteroid-1.png rejected."
+    },
+    {
+      "id": "derelict_wreck",
+      "kind": "derelict",
+      "path": "res://assets/bodies/derelicts/derelict_wreck",
+      "status": "wired",
+      "milestone": "M1",
+      "source": {
+        "provider": "recraft",
+        "prompt": "STYLE block + 'A wrecked derelict freighter hull, three-quarter view from slightly above'",
+        "date": "2026-09-09",
+        "original_filename": "dump/gen/derelict-1.png"
+      },
+      "license": {
+        "status": "pending",
+        "terms": "Recraft free tier; commercial terms not yet confirmed"
+      },
+      "notes": "Candidate derelict-2.png rejected."
+    },
+    {
+      "id": "wenrexa_holo",
+      "kind": "ui_pack",
+      "path": "res://assets/ui/wenrexa_holo",
+      "status": "wired",
+      "milestone": "M1",
+      "source": {
+        "provider": "pack",
+        "original_filename": "1. Free Hologram Interface Wenrexa.zip; 2. More UI Hologram Interface Wenrexa.zip",
+        "item_url": "https://wenrexa.itch.io/holoui",
+        "date": "2026-09-09"
+      },
+      "license": {
+        "status": "verified",
+        "terms": "CC0 1.0 Universal per the itch.io asset-license field (verified 2026-09-09); credit Wenrexa in-game anyway"
+      },
+      "notes": "97 PNGs, names converted to snake_case, content untouched. Per-file original path -> imported name table: assets/ui/wenrexa_holo/RENAMES.md. ZIPs 3-5 (icon sets) staged in assets/dump, not imported."
+    },
+    {
+      "id": "galaxy_full",
+      "kind": "background",
+      "path": "res://assets/backgrounds/galaxy_full.jpg",
+      "status": "wired",
+      "milestone": "M0",
+      "source": {
+        "provider": "user"
+      },
+      "license": {
+        "status": "unknown",
+        "terms": "user-provided galaxy image, origin not recorded"
+      },
+      "notes": "23 MB master, never edited, reserved for the future map screen. Excluded from exports once export presets exist."
+    },
+    {
+      "id": "planet_lava",
+      "kind": "planet",
+      "path": "res://assets/bodies/planets/planet_lava",
+      "status": "wanted",
+      "milestone": "sprint",
+      "source": {
+        "provider": "local"
+      },
+      "license": {
+        "status": "pending"
+      },
+      "notes": "Sprint step 2: house-model bake-off, SDXL 1.0 vs Z-Image-Turbo, 3 seeds each; the user's Gemini-app renders of the same prompt are the quality reference."
+    },
+    {
+      "id": "merchant_mk2",
+      "kind": "ship",
+      "path": "res://assets/ships/merchant_mk2",
+      "status": "wanted",
+      "milestone": "sprint",
+      "source": {
+        "provider": "local"
+      },
+      "license": {
+        "status": "pending"
+      },
+      "notes": "Sprint step 3 proof hull: concept sheet (local; Gemini app if local cannot hold three consistent views) -> Hunyuan3D local -> normalize_hull.py. Mid-tier trader, boxy silhouette."
+    },
+    {
+      "id": "interceptor_mk1",
+      "kind": "ship",
+      "path": "res://assets/ships/interceptor_mk1",
+      "status": "wanted",
+      "milestone": "M2",
+      "source": {
+        "provider": "local"
+      },
+      "license": {
+        "status": "pending"
+      },
+      "notes": "Light fighter, wedge silhouette. No baked weapons."
+    },
+    {
+      "id": "hauler_mk1",
+      "kind": "ship",
+      "path": "res://assets/ships/hauler_mk1",
+      "status": "wanted",
+      "milestone": "M2",
+      "source": {
+        "provider": "local"
+      },
+      "license": {
+        "status": "pending"
+      },
+      "notes": "Freighter, long silhouette, big cargo hold."
+    },
+    {
+      "id": "planet_gas_giant",
+      "kind": "planet",
+      "path": "res://assets/bodies/planets/planet_gas_giant",
+      "status": "wanted",
+      "milestone": "M2",
+      "source": {
+        "provider": "local"
+      },
+      "license": {
+        "status": "pending"
+      },
+      "notes": "Ringed. Rings break the UV-spin trick; evaluate a ring-less variant if the spin looks wrong."
+    },
+    {
+      "id": "planet_ice",
+      "kind": "planet",
+      "path": "res://assets/bodies/planets/planet_ice",
+      "status": "wanted",
+      "milestone": "M2",
+      "source": {
+        "provider": "local"
+      },
+      "license": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "sun_red_dwarf",
+      "kind": "sun",
+      "path": "res://assets/bodies/suns/sun_red_dwarf",
+      "status": "wanted",
+      "milestone": "M2",
+      "source": {
+        "provider": "local"
+      },
+      "license": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "sun_blue_giant",
+      "kind": "sun",
+      "path": "res://assets/bodies/suns/sun_blue_giant",
+      "status": "wanted",
+      "milestone": "M2",
+      "source": {
+        "provider": "local"
+      },
+      "license": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "icon_metal_ore",
+      "kind": "icon",
+      "path": "res://assets/ui/icons/commodities/metal_ore.png",
+      "status": "wanted",
+      "milestone": "M2",
+      "source": {
+        "provider": "local"
+      },
+      "license": {
+        "status": "pending"
+      },
+      "notes": "Commodity icon set: generate all eight in one sitting so they match."
+    },
+    {
+      "id": "icon_anaerobes",
+      "kind": "icon",
+      "path": "res://assets/ui/icons/commodities/anaerobes.png",
+      "status": "wanted",
+      "milestone": "M2",
+      "source": {
+        "provider": "local"
+      },
+      "license": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "icon_medicine",
+      "kind": "icon",
+      "path": "res://assets/ui/icons/commodities/medicine.png",
+      "status": "wanted",
+      "milestone": "M2",
+      "source": {
+        "provider": "local"
+      },
+      "license": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "icon_organics",
+      "kind": "icon",
+      "path": "res://assets/ui/icons/commodities/organics.png",
+      "status": "wanted",
+      "milestone": "M2",
+      "source": {
+        "provider": "local"
+      },
+      "license": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "icon_oil",
+      "kind": "icon",
+      "path": "res://assets/ui/icons/commodities/oil.png",
+      "status": "wanted",
+      "milestone": "M2",
+      "source": {
+        "provider": "local"
+      },
+      "license": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "icon_uranium",
+      "kind": "icon",
+      "path": "res://assets/ui/icons/commodities/uranium.png",
+      "status": "wanted",
+      "milestone": "M2",
+      "source": {
+        "provider": "local"
+      },
+      "license": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "icon_equipment",
+      "kind": "icon",
+      "path": "res://assets/ui/icons/commodities/equipment.png",
+      "status": "wanted",
+      "milestone": "M2",
+      "source": {
+        "provider": "local"
+      },
+      "license": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "icon_spice",
+      "kind": "icon",
+      "path": "res://assets/ui/icons/commodities/spice.png",
+      "status": "wanted",
+      "milestone": "M2",
+      "source": {
+        "provider": "local"
+      },
+      "license": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "portrait_port_master",
+      "kind": "portrait",
+      "path": "res://assets/ui/portraits/port_master.png",
+      "status": "wanted",
+      "milestone": "M2",
+      "source": {
+        "provider": "gemini_app"
+      },
+      "license": {
+        "status": "pending"
+      },
+      "notes": "Hero portrait: the user generates in the Gemini app (Nano Banana Pro). Bust on black, neutral expression, reads at 64px in the trade screen."
+    },
+    {
+      "id": "music_safe_space",
+      "kind": "music",
+      "path": "res://assets/audio/music/safe_space.ogg",
+      "status": "wanted",
+      "milestone": "sprint",
+      "source": {
+        "provider": "envato"
+      },
+      "license": {
+        "status": "pending"
+      },
+      "notes": "Sprint step 7: calm ambient for police-controlled systems. Register to Envato project 'GalacticKingdom'."
+    },
+    {
+      "id": "music_lawless",
+      "kind": "music",
+      "path": "res://assets/audio/music/lawless.ogg",
+      "status": "wanted",
+      "milestone": "sprint",
+      "source": {
+        "provider": "envato"
+      },
+      "license": {
+        "status": "pending"
+      },
+      "notes": "Tense, low, for lawless space."
+    },
+    {
+      "id": "music_docked",
+      "kind": "music",
+      "path": "res://assets/audio/music/docked.ogg",
+      "status": "wanted",
+      "milestone": "sprint",
+      "source": {
+        "provider": "envato"
+      },
+      "license": {
+        "status": "pending"
+      },
+      "notes": "Port and starbase screens."
+    },
+    {
+      "id": "font_ui",
+      "kind": "font",
+      "path": "res://assets/ui/fonts/ui.ttf",
+      "status": "wanted",
+      "milestone": "sprint",
+      "source": {
+        "provider": "envato"
+      },
+      "license": {
+        "status": "pending"
+      },
+      "notes": "One UI face for the holo theme; check the Envato font license allows embedding in a game."
+    }
+  ]
+}

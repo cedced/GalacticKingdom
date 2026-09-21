@@ -1,0 +1,8 @@
+{
+  "id": "station_starbase",
+  "kind": "station",
+  "sprite_dir": "res://assets/bodies/stations/station_starbase",
+  "spin_speed": 0.0,
+  "tint_mix": 0.1,
+  "station_kinds": ["starbase"]
+}

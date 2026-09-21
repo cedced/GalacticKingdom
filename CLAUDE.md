@@ -80,6 +80,7 @@ Recorded as ADR-001 in `wiki/adr/`. Change the stack only via a new ADR.
     factions/               reputation, territory, diplomacy
     entities/               ships, players, NPCs, structures (data-only)
     motion/                 ship motion integration, shared by server tick and client prediction
+  net/                      wire protocol shared by both peers: the RpcSurface node (declarations + signals, no logic)
   server/                   authoritative game server (uses sim/)
     net/                    replication, snapshots, RPC handlers
     persistence/            DB access layer, migrations
@@ -103,7 +104,7 @@ Hard rule: `sim/` has zero dependencies on `client/`, `server/`, or Godot scene 
 
 - The world is a 3D scene. Gameplay happens on the XZ plane (Y is up). Height is used for visual layering only (ships hover, stations tower, planets are spheres).
 - Camera is `Camera3D` in orthographic mode, pitched 30 degrees (true isometric would be 35.264; 30 gives a 2:1 pixel ratio that reads as classic iso), yawed 45 degrees. Camera does not rotate in gameplay. Zoom changes `size`, not position.
-- Render at a fixed internal resolution and upscale with nearest-neighbor if we go for a pixel look, or render native if we go painterly. This is an open art decision (see `wiki/systems/rendering.md`). Do not bake this choice into gameplay code.
+- Art direction (decided at M1): pre-rendered painterly realism — render at native resolution with linear filtering; no pixel-snap pipeline. See `wiki/systems/rendering.md` and `assets/ART_WORKFLOW.md`. Still: do not bake presentation choices into gameplay code.
 - Shadows, lighting, and post-processing are allowed but must be cheap: target 60 fps on integrated graphics with 50 ships and 200 projectiles on screen.
 - All movement, hit detection, and positioning is 2D (XZ). Never let render height affect collision.
 - Sorting and occlusion are handled by the 3D depth buffer. Do not write manual Y-sort logic.
@@ -184,6 +185,11 @@ Do not start M(n+1) features while M(n) has open blocking bugs.
 ## 11. Quick commands
 
 ```
+# after pulling/merging new assets: regenerate the import cache once
+# (.godot/ is per-checkout and gitignored; skipping this makes texture
+# preloads fail and scripts that preload them load as Nil)
+godot --headless --path . --import
+
 # run headless server (dev, SQLite)
 godot --headless --path . --main-scene res://server/main.tscn
 
@@ -193,11 +199,17 @@ godot --path . --main-scene res://client/main.tscn
 # run all tests
 godot --headless --path . -s addons/gut/gut_cmdln.gd -gdir=res://tests -gexit
 
-# validate data against schemas
+# validate data against schemas and assets against the manifest
 python tools/validate_data.py
 
-# render a galaxy for a seed to PNG
-python tools/galaxy_viewer.py --seed 12345 --out /tmp/galaxy.png
+# self-test the asset manifest check (pure Python, no Godot)
+python -m unittest discover -s tests/tools
+
+# render a galaxy for a seed to PNG (uses the real sim/galaxy code, params from data/tuning.json)
+godot --headless --path . -s tools/galaxy_viewer.gd -- --seed=12345 --out=galaxy.png
+
+# intake a rendered sprite into assets/bodies (crop, clean, sheet + data stub; see assets/ART_WORKFLOW.md)
+python tools/import_body_sprite.py art.png --kind planet --id planet_lava
 ```
 
 Update this section whenever a script or path changes.

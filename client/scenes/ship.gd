@@ -4,19 +4,20 @@ extends Node3D
 ## Vector2s; the hover height here never feeds back into gameplay.
 
 const HOVER_HEIGHT: float = 0.5
-const BLEND_RATE: float = 12.0
 
+var _blend_rate: float = 0.0
 var _target_position: Vector3 = Vector3.ZERO
 var _target_heading: float = 0.0
 
 
 func _ready() -> void:
 	position.y = HOVER_HEIGHT
+	_blend_rate = Tuning.value_f("net.view_blend_rate")
 
 
 func _process(delta: float) -> void:
 	# Framerate-independent exponential blend toward the latest network state.
-	var weight: float = 1.0 - exp(-BLEND_RATE * delta)
+	var weight: float = 1.0 - exp(-_blend_rate * delta)
 	position = position.lerp(_target_position, weight)
 	rotation.y = lerp_angle(rotation.y, _target_heading, weight)
 

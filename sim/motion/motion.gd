@@ -88,3 +88,32 @@ static func step(state: ShipState, intent: ShipIntent, hull: HullDef, dt: float)
 	if state.velocity.length() > hull.max_speed:
 		state.velocity = state.velocity.normalized() * hull.max_speed
 	state.position += state.velocity * dt
+
+
+## Push the ship out of overlapping obstacles and kill the inward velocity
+## component so it slides along walls instead of sticking. Enter mode skips
+## enterable obstacles (the caller decides what contact there means); the
+## sun is never enterable. Runs identically on server and prediction, like
+## step(). Returns the obstacle currently touched in enter mode, or null.
+static func resolve_obstacles(
+	state: ShipState,
+	obstacles: Array[Obstacle],
+	ship_radius: float,
+	enter_mode: bool,
+) -> Obstacle:
+	var touched: Obstacle = null
+	for obstacle: Obstacle in obstacles:
+		var min_dist: float = obstacle.radius + ship_radius
+		var offset: Vector2 = state.position - obstacle.position
+		if offset.length_squared() >= min_dist * min_dist:
+			continue
+		if enter_mode and obstacle.enterable:
+			touched = obstacle
+			continue
+		# Dead-center overlap has no direction; pick one instead of NaN.
+		var normal: Vector2 = offset.normalized() if offset.length() > 0.0001 else Vector2.RIGHT
+		state.position = obstacle.position + normal * min_dist
+		var inward: float = state.velocity.dot(normal)
+		if inward < 0.0:
+			state.velocity -= normal * inward
+	return touched
