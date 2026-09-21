@@ -1,8 +1,7 @@
 # ADR-004: Asset sourcing and generation policy
 
 Status: Proposed (accept once sprint step 3 proves the local image-to-3D
-pipeline on the reference machine and the generation-access question in
-`wiki/systems/asset-pipeline.md` is closed)
+pipeline on the reference machine)
 
 ## Context
 
@@ -45,9 +44,10 @@ and Higgsfield was dropped.
    `assets/dump/gen/<manifest_id>/`, and the user approves before intake.
    Access requires an AI Studio API key with billing (`GEMINI_API_KEY` in
    `.env`, never committed); the Google AI Pro subscription alone does not
-   provide API access. Until billing is enabled, the fallback is the user
-   generating by hand in the Gemini app and dropping PNGs in `dump/gen/`.
-   Spend cap per sprint: see the open question in the pipeline page.
+   provide API access. Sprint step 2 runs by hand in the Gemini app (the
+   user generates, Claude intakes) to prove the loop; billing is enabled
+   before the M2 batch. No standing spend cap: Claude estimates each API
+   batch from list prices and asks before running it.
 5. **`data/assets/manifest.json` is the single source of truth** for every
    asset: wanted or present, provenance, prompt, model, seed, license, cost.
    It is schema-validated and CI fails when a file under `assets/` has no

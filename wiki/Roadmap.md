@@ -24,10 +24,10 @@ matters; each step is its own small PR.
 | # | Step | Done when |
 |---|---|---|
 | 1 | Manifest: `data/schemas/asset_manifest.schema.json`, `data/assets/manifest.json` seeded with the 11 existing rows + the wanted list, assets check in `tools/validate_data.py`, CI step, `tests/tools/` fixture test, `SOURCES.md` files deleted, `assets/README.md` layout updated | CI green with the gate on; an orphan file under `assets/` fails CI. **Done 2026-09-20.** |
-| 2 | Gemini access settled (API billing or manual app fallback), `tools/gen/gemini_image.py`, first sprite through the full loop: lava planet, Nano Banana 2 vs Pro A/B'd, house model recorded | `planet_lava` wired, screenshot verified |
+| 2 | First sprite through the full loop by hand: user generates the lava planet in the Gemini app (Nano Banana vs Nano Banana Pro if the picker offers it), drops PNGs in `assets/dump/gen/planet_lava/`, Claude intakes, wires, verifies | `planet_lava` wired, screenshot verified, house model noted |
 | 3 | Ship pipeline proof: one concept sheet (trader hull) → Hunyuan3D local on the RTX 3080 (texture stage may need low-VRAM mode) → `tools/normalize_hull.py` (Blender 5.2 headless) → GLB beside `merchant_mk1` | Local pipeline proven, ADR-004 flipped to Accepted; second hull renders in-game |
 | 4 | M2 debt row: server names hull at spawn, client renders `HullDef.model` | Two different hulls visible in one system |
-| 5 | M2 batch: two more hulls (light fighter, freighter), eight commodity icons, port master portrait, gas giant + ice planet, red dwarf + blue giant suns | All rows `wired`, contact sheet of icons reviewed |
+| 5 | Gemini API billing enabled, `tools/gen/gemini_image.py` written, then the M2 batch: two more hulls (light fighter, freighter), eight commodity icons, port master portrait, gas giant + ice planet, red dwarf + blue giant suns. Claude asks before each batch with a list-price estimate. | All rows `wired`, contact sheet of icons reviewed |
 | 6 | Rotation-sheet experiment on one planet via a Veo orbit clip + `tools/frames_from_clip.py`; keep or kill | Decision recorded in the pipeline page; `assets/README.md` 32-angle target kept or removed |
 | 7 | Envato: project "GalacticKingdom" registered, flow proven once (three music slots: safe space, lawless, docked; one UI font), `tools/import_audio.py` | Tracks play from a test scene, rows `wired` with registration date |
 | 8 | Manifest `wanted` rows seeded for M3–M6 (table below) | Rows exist; nothing generated |

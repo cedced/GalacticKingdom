@@ -12,3 +12,8 @@ exports/
 
 # Python tool caches
 __pycache__/
+
+# Transient generation candidates and Envato downloads awaiting intake (assets/README.md);
+# the manifest row is the record, the kept file lands under assets/<kind>/
+assets/dump/gen/
+assets/dump/envato/

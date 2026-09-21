@@ -9,9 +9,16 @@ Since 2026-09-20: **Claude generates, the human curates.** Claude runs
 `tools/gen/gemini_image.py` / `tools/gen/veo_clip.py` against the Gemini
 API (`GEMINI_API_KEY` in `.env`, never committed), drops candidates in
 `assets/dump/gen/<manifest_id>/`, you pick one (or none), Claude runs
-intake, wiring, and in-game verification. Until API billing is enabled,
-the fallback is you generating in the Gemini app (Nano Banana is in Google
-AI Pro) with the same style block and dropping the PNGs in that folder.
+intake, wiring, and in-game verification. Claude asks before every API
+batch with a list-price estimate.
+
+Manual mode (sprint step 2, and any time the API is off): you paste the
+style block + asset prompt into the Gemini app (Nano Banana is included in
+Google AI Pro; pick Nano Banana Pro from the model picker when it is
+offered), download the PNGs into `assets/dump/gen/<manifest_id>/`, and
+say which model made which file. Steps 3-6 are identical. Turn off Gemini
+Apps Activity first so prompts are not used for training. `dump/gen/` is
+gitignored: the manifest row is the record, not the candidates.
 
 ## The loop at a glance
 
