@@ -85,6 +85,7 @@ class ValidateAssetsTest(unittest.TestCase):
         self.tree.file("bodies/README.md")  # excluded
         self.tree.file("vfx/.gitkeep")  # excluded
         self.tree.file("dump/gen/anything.png")  # excluded
+        self.tree.file("source/loras/gk_style_v1.safetensors")  # excluded
         self.tree.body("planet_x", "res://assets/bodies/planets/planet_x")
         self.tree.manifest([row("planet_x"), row("planet_lava", status="wanted")])
         self.assertEqual(self.tree.check(), [])
@@ -153,6 +154,24 @@ class ValidateAssetsTest(unittest.TestCase):
         self.tree.manifest([row("planet_x", license={"status": "verified"})])
         errors = self.tree.check()
         self.assertTrue(any("'terms' is a required property" in e for e in errors), errors)
+
+    def test_schema_requires_reproduction_fields_on_wired_local_rows(self) -> None:
+        self.tree.file("bodies/planets/planet_x/sheet.png")
+        self.tree.manifest([row("planet_x", source={"provider": "local", "model": "sdxl-base-1.0"})])
+        errors = self.tree.check()
+        for field in ("workflow", "prompt", "seed"):
+            self.assertTrue(any(f"'{field}' is a required property" in e for e in errors), errors)
+
+    def test_schema_accepts_complete_wired_local_row(self) -> None:
+        self.tree.file("bodies/planets/planet_x/sheet.png")
+        self.tree.manifest([row("planet_x", source={
+            "provider": "local",
+            "model": "sdxl-base-1.0 + gk_style_v1",
+            "workflow": "tools/gen/workflows/sprite_sdxl.json",
+            "prompt": "STYLE block + a single lava planet",
+            "seed": 1234,
+        })])
+        self.assertEqual(self.tree.check(), [])
 
     def test_summary_counts_statuses_and_licenses(self) -> None:
         self.tree.file("bodies/planets/planet_x/sheet.png")

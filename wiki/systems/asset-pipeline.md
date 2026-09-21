@@ -10,25 +10,27 @@ and import rules are `assets/README.md`.
 
 Turn "we need a lava planet / a second hull / a laser bolt / a click sound"
 into a repeatable loop: a manifest row says what is wanted, Claude
-generates candidates, the user approves, tooling normalizes and wires the
-asset, CI proves it is licensed and referenced. The look stays uniform
-because every diegetic asset passes through the same style block.
+generates candidates on the local GPU, the user approves, tooling
+normalizes and wires the asset, CI proves it is licensed and referenced.
+The look stays uniform because every diegetic asset passes through the
+same style block and, once trained, the same style LoRA.
 
-### Decisions from the 2026-09-20 planning round
+### Decisions from the 2026-09-20/21 planning round
 
 | Question | Decision |
 |---|---|
-| Ship hulls | Hybrid: Gemini concept art → Hunyuan3D (local) → Blender normalization → GLB. ADR-003 (ships are 3D) holds. |
+| Ship hulls | Hybrid: concept sheet (local model or Gemini app) → Hunyuan3D (local) → Blender normalization → GLB. ADR-003 (ships are 3D) holds. |
 | Scope | Bodies, VFX, UI (icons/portraits/screens), audio (SFX + music). Ships via the row above. |
 | License gate | Case by case: replace an unknown-license asset when the new one is licensed *and* better. No deadline. |
-| Gemini produces | Nano Banana: still sprites, icons, portraits, ship concepts, marketing. Veo: orbit clips for rotation sheets, VFX clips → frames. |
-| Who generates | Sprint step 2 by hand: the user generates in the Gemini app, Claude intakes. From the M2 batch on: API billing enabled, Claude generates from `tools/gen/`, the user curates. |
-| Tooling | `data/assets/manifest.json` + schema + CI gate. |
+| Generators | **No pay-per-use APIs.** Local open-weight diffusion (SDXL / Z-Image-Turbo / FLUX.2 klein 4B, house model by bake-off) driven by Claude through ComfyUI; the Gemini app (Google AI Pro, already paid) as the user's manual channel for hero pieces. Higgsfield and the Gemini API were considered and dropped. |
+| Fine-tuning | A style LoRA trained on our own approved sprites (manifest rows = dataset, prompts = captions), retrained as the library grows. |
+| Who generates | Claude generates on the local GPU; the user curates. Hero pieces: the user generates in the Gemini app, Claude intakes. |
+| Tooling | `data/assets/manifest.json` + schema + CI gate; ComfyUI workflows as JSON in `tools/gen/workflows/`; `tools/gen/models.json` for checkpoints and LoRAs. |
 | Cadence | One asset sprint before M2, then per-milestone asset rows. |
-| Style mixing | Envato for non-diegetic only (music, VFX footage, textures, fonts, UI kits). |
-| Gemini access | AI Studio API key + billing (`GEMINI_API_KEY` in `.env`). The user's Google AI Pro subscription covers the app only. No treg. Higgsfield dropped (it resells the same Google models). |
-| Image-to-3D | Hunyuan3D locally on the RTX 3080; background removal with `rembg` locally. No cloud 3D. |
-| Budget | Gemini API pay-per-image (≈ $0.05–0.15 Nano Banana 2, ≈ $0.13–0.24 Pro, Veo from ≈ $0.15/s). No standing cap: Claude estimates from list prices and asks before every batch. |
+| Style mixing | Envato for non-diegetic only (music, SFX, VFX footage, textures, fonts, UI kits). |
+| Image-to-3D | Hunyuan3D locally on the RTX 3080; `rembg` locally for alpha. No cloud 3D. |
+| Video | None generated. VFX = Godot particles/shaders first; rotation sheets = Blender turntable of a generated texture (experiment). |
+| Budget | $0 in APIs. GPU time only; Claude states expected wall-clock before batches over ~1 h. |
 | Envato flow | Claude shortlists in the user's Chrome; user downloads to `assets/dump/envato/<slug>/`; Claude intakes. |
 | Audio | SFX and music both from Envato Elements libraries. No generated audio. |
 
@@ -55,19 +57,19 @@ or a directory (a sprite-sheet folder, a hull folder, a whole UI pack).
 |---|---|---|
 | `id` | string, snake_case | Matches the `data/` id where one exists (`planet_lava`, `merchant_mk1`, `sfx_laser_small`). |
 | `kind` | enum | `ship`, `planet`, `sun`, `station`, `asteroid`, `derelict`, `vfx`, `icon`, `portrait`, `ui_pack`, `sfx`, `music`, `texture`, `font`, `background` |
-| `path` | string | `res://assets/...` file or directory. Every file under `assets/` (except `dump/`, `*.import`, `*.md`, `.gitkeep`) must be covered by exactly one row's `path`, by prefix for directories. |
+| `path` | string | `res://assets/...` file or directory. Every file under `assets/` (except `dump/`, `source/`, `*.import`, `*.md`, `.gitkeep`) must be covered by exactly one row's `path`, by prefix for directories. |
 | `status` | enum | `wanted` → `generated` (candidates in `dump/gen/`) → `approved` (user picked one) → `wired` (in `assets/` and referenced from `data/` or a scene) → `replaced` (kept for history; `path` may be empty). |
 | `milestone` | string | `M2`…`M6`, or `sprint`. |
-| `source.provider` | enum | `gemini`, `hunyuan3d`, `envato`, `recraft`, `user`, `pack`, `derived` |
-| `source.model` | string | Gemini model id (`gemini-3.1-flash-image`, `gemini-3-pro-image`, `veo-3.1-lite`, ...) or tool version (`hunyuan3d-2.1`). |
-| `source.prompt` | string | Full prompt including the style block, or the Envato search that found it. |
-| `source.seed`, `source.job_id`, `source.date` | | Reproduction handles. Gemini image models expose no seed, so `date` + `model` + `prompt` + the kept file are the record; `job_id` is for providers that have one (Veo operations). |
-| `source.parent_id` | string | For `derived` rows: the manifest id this was cut/extracted from (a hull from a concept, a sheet from a clip). |
+| `source.provider` | enum | `local` (ComfyUI on the reference machine), `gemini_app` (user, Google AI Pro), `hunyuan3d`, `envato`, `recraft`, `user`, `pack`, `derived` |
+| `source.model` | string | Checkpoint plus LoRA as named in `tools/gen/models.json` (`sdxl-base-1.0 + gk_style_v1`), the Gemini app model name, or a tool version (`hunyuan3d-2.1`). |
+| `source.workflow` | string | `local` rows: the ComfyUI workflow JSON under `tools/gen/workflows/` that produced it. |
+| `source.prompt` | string | Full prompt including the style block, or the search that found an Envato item. Doubles as the LoRA caption. |
+| `source.seed`, `source.date` | | Reproduction handles. Local models honor the seed; the Gemini app has none, so `date` + `model` + the kept file are its record. |
+| `source.parent_id` | string | For `derived` rows: the manifest id this was cut/extracted from (a hull from a concept, a sheet from a texture). |
 | `source.original_filename`, `source.item_url` | | Envato/pack traceability, replacing `SOURCES.md`. |
 | `license.status` | enum | `verified`, `unknown`, `pending` |
-| `license.terms` | string | One line: "Gemini API paid tier: outputs owned, no training, SynthID", "Envato Elements, registered to GalacticKingdom on <date>", "CC0", "unknown pack". |
+| `license.terms` | string | One line: "SDXL OpenRAIL++-M, outputs unrestricted", "Z-Image-Turbo Apache 2.0", "Envato Elements, registered to GalacticKingdom on <date>", "CC0", "unknown pack". |
 | `license.registered_project` | string | Envato only. |
-| `cost_usd` | number | What the row's generations cost, from the model's list price (candidates included). |
 | `notes` | string | Why this one won, what was rejected. |
 
 Rules:
@@ -79,18 +81,30 @@ Rules:
 - `wanted` rows are the shopping list. Adding a milestone's asset needs
   means adding `wanted` rows, nothing else.
 
+### `tools/gen/models.json`
+
+Every local checkpoint and LoRA: name, family (`sdxl`, `z-image`,
+`flux2-klein`), source URL, license, sha256, local path under
+`assets/source/`, and for LoRAs the training config and the manifest ids
+it was trained on. Nothing under `assets/source/` is committed or exported;
+this file is what lets a fresh machine rebuild it.
+
 ### Folder additions to `assets/README.md`
 
 ```
 assets/
   dump/
-    gen/<manifest_id>/         Gemini candidates awaiting approval (never referenced)
-    envato/<item_slug>/        user downloads + license certificate, awaiting intake
+    gen/<manifest_id>/         candidates awaiting approval (local or Gemini app; gitignored)
+    envato/<item_slug>/        user downloads + license certificate, awaiting intake (gitignored)
+  source/                      gitignored, never exported, skipped by the coverage check
+    models/                    checkpoints (sha256 in tools/gen/models.json)
+    loras/                     trained style LoRAs
+    datasets/<lora_name>/      captioned training sets built from the manifest
   ships/<hull_id>/
     <hull_id>.glb
-    concept/                   approved concept views (front/side/top), source for image-to-3D
+    concept/                   approved concept views (front/side/top), source for Hunyuan3D
   vfx/<vfx_id>/
-    sheet.png + sheet.json     same sheet.json shape as bodies (frames, frame_w/h, fps), plus "loop": bool
+    sheet.png + sheet.json     only for effects a shader cannot do; same sheet.json shape as bodies plus "loop": bool
   ui/
     icons/<set>/<id>.png       commodity, ship-class, building, status icons; 128px master
     portraits/<id>.png         512px, transparent, bust only
@@ -101,32 +115,48 @@ assets/
 
 ## Algorithms
 
-Each asset kind is a loop of the same five steps; only the generator
-call and the intake tool differ. Claude runs every step except *approve*.
+Each asset kind is a loop of the same five steps; only the generator and
+the intake tool differ. Claude runs every step except *approve* (and
+*generate* when the channel is the Gemini app).
 
 ```
-want -> generate (tools/gen/ -> Gemini API) -> approve (user) -> intake (tools/) -> wire + verify (Claude)
+want -> generate (tools/gen/comfy_generate.py, or the user in the Gemini app) -> approve (user) -> intake (tools/) -> wire + verify (Claude)
 ```
 
 | Kind | Generate | Intake | Verify |
 |---|---|---|---|
-| Planet / sun / station / asteroid / derelict | `tools/gen/gemini_image.py`: style block + per-asset prompt from `ART_WORKFLOW.md`; `rembg` on the pick for real alpha. 2 candidates per row; Nano Banana 2 vs Pro on the first row of each kind to pick the house model. | `tools/import_body_sprite.py` (exists) | in-game screenshot at min/max zoom; tint response; no fringe |
-| Rotation sheet (experiment) | `tools/gen/veo_clip.py`: image-to-video from the approved still, "slow orbit, one full turn", black background. | `tools/frames_from_clip.py` (new): N evenly spaced frames → strip + `sheet.json` | terminator stays fixed; frame-to-frame jitter below one pixel at gameplay zoom; otherwise keep the UV-spin shader |
-| VFX | `tools/gen/veo_clip.py`: 2–5 s clip on pure black, one effect, static camera (Veo Lite first; Standard only if Lite smears). | `tools/frames_from_clip.py`: fixed fps, crop to content, additive-ready (black = transparent) | plays in a test scene with additive blend; loops if `loop` |
-| Ship hull | 1) concept sheet: front, side, top-down 3/4 views of one hull on black, same style block; 2) Hunyuan3D locally (multi-view input with the three views); 3) `tools/normalize_hull.py` via Blender 5.2 headless: Y-up, forward -Z, origin at center of mass, scale to class length, decimate to the polycount budget, bake to one material; export GLB. | `tools/normalize_hull.py` (new) | `tools/validate_data.py` model check; renders beside `merchant_mk1` under the iso camera; silhouette distinct at default zoom |
-| Icon | Text-to-image, style block + "flat-lit icon of <thing>, centered, 20% padding"; generate the set in one pass so members match. | `tools/import_icon.py` (new): crop, resize to 128, alpha | contact-sheet screenshot of the whole set |
-| Portrait | Nano Banana Pro, bust on black, neutral expression; for recurring characters reuse the approved portrait as a reference image (Nano Banana edits keep identity). | `tools/import_icon.py --portrait` | reads at 64px in the trade screen |
+| Planet / sun / station / asteroid / derelict | `comfy_generate.py --id <row>`: style block + per-asset prompt from `ART_WORKFLOW.md`, house model + style LoRA, 3 seeds; `rembg` on the pick for real alpha. | `tools/import_body_sprite.py` (exists) | in-game screenshot at min/max zoom; tint response; no fringe |
+| Rotation sheet (experiment) | Generate an equirectangular planet texture (local, "seamless equirectangular map of a <biome> planet"); `tools/render_turntable.py` in Blender headless: UV sphere, fixed upper-left light, N angles. | `render_turntable.py` writes `sheet.png` + `sheet.json` directly | terminator fixed by construction; compare against the UV-spin shader at gameplay zoom; keep or kill |
+| VFX | Godot `GPUParticles3D` + shaders in `client/rendering/vfx/` (M3). Sprite sheet only if a shader cannot do it: local video model (Wan 2.2 5B / LTX) or a Blender sim, then `tools/frames_from_clip.py`. | `tools/frames_from_clip.py` (only if needed) | plays in a test scene with additive blend; loops if `loop` |
+| Ship hull | 1) concept sheet: front, side, top-down 3/4 views of one hull on black — local with the style LoRA, or the Gemini app for hero hulls; 2) Hunyuan3D locally (multi-view); 3) `tools/normalize_hull.py` via Blender 5.2 headless: Y-up, forward -Z, origin at center of mass, scale to class length, decimate to the polycount budget, bake to one material; export GLB. | `tools/normalize_hull.py` (new) | `tools/validate_data.py` model check; renders beside `merchant_mk1` under the iso camera; silhouette distinct at default zoom |
+| Icon | Local, style block + "flat-lit icon of <thing>, centered, 20% padding"; one seed series for the whole set so members match. | `tools/import_icon.py` (new): crop, resize to 128, alpha | contact-sheet screenshot of the whole set |
+| Portrait | Gemini app (hero) or local; bust on black, neutral expression; recurring characters reuse the approved portrait as an img2img/reference input. | `tools/import_icon.py --portrait` | reads at 64px in the trade screen |
 | SFX | Envato: Claude shortlists packs/clips per manifest row in the user's Chrome; user downloads with license. | `tools/import_audio.py` (new): trim silence, normalize to -16 LUFS, mono, OGG | plays from the test scene without clipping |
-| Music | Envato: Claude shortlists 3–5 tracks per slot in the user's Chrome; user downloads with license, registers to "GalacticKingdom". | `tools/import_audio.py --music` | loops cleanly; sits under SFX |
+| Music | Envato: Claude shortlists 3–5 tracks per slot; user downloads with license, registers to "GalacticKingdom". | `tools/import_audio.py --music` | loops cleanly; sits under SFX |
 | Envato non-audio (fonts, textures, footage) | Same shortlist/download flow. | manual, one row per item | — |
 
 Ordering inside a batch: generate every candidate for the batch first, then
 one approval pass, then intake. Never interleave, so the user reviews once.
 
+### Style LoRA routine
+
+1. `tools/gen/build_dataset.py --lora gk_style_vN`: every `wired` row of a
+   diegetic kind whose provider is `local`, `recraft`, or `user` becomes one
+   image + caption (the row's prompt minus the style block, plus the
+   trigger word `gkstyle`). Gemini-app rows are excluded until the terms
+   question below is settled.
+2. `tools/gen/train_lora.py --lora gk_style_vN`: kohya-ss (SDXL) or
+   ai-toolkit (Z-Image / FLUX.2 klein) with the config recorded in
+   `models.json`; 768 px on the 10 GB card, ~1 h.
+3. A/B on two held-out prompts with and without the LoRA; the user picks;
+   the winner's name goes into the default workflow.
+4. Retrain when a milestone adds roughly 20 approved sprites.
+
 ## Tuning knobs
 
-None in `data/tuning.json` yet. Audio bus levels arrive with M3 (`audio.*`).
-Sheet playback speed lives in each `sheet.json` (`fps`).
+None in `data/tuning.json`. Generation parameters (steps, CFG, resolution,
+LoRA weight) live in the workflow JSON files; sheet playback speed lives in
+each `sheet.json` (`fps`).
 
 ## Interactions with other systems
 
@@ -135,37 +165,36 @@ Sheet playback speed lives in each `sheet.json` (`fps`).
   renders `HullDef.model`" must land before a second hull is useful.
 - **Rendering**: the style block encodes the scene's light direction; if
   the sun light ever moves, every sprite is wrong. Change both or neither.
+  VFX shaders live in `client/rendering/`.
 - **Galaxy generator**: biome and star-type ids in `data/bodies/*.json`
   select sprites; new planets extend `biomes` coverage, not sim code.
 - **UI** (`wiki/systems/ui.md`): icons and portraits use the holo theme's
   palette for accents; the Wenrexa pack stays the widget source.
-- **Combat** (M3): VFX ids referenced from `data/weapons/*.json` once that
-  schema exists; the manifest row exists first.
-- **CI**: one new step runs the assets check; `dump/` is excluded from
-  exports and from the check.
+- **Combat** (M3): particle/shader VFX referenced from `data/weapons/*.json`
+  once that schema exists.
+- **CI**: the validate-data job runs the assets check; `dump/` and
+  `source/` are excluded from exports and from the check.
 
 ## Open questions
 
 - Should release exports *fail* on `license.status: unknown`, or only print
-  the report? Case by case for now (ADR-004 §6); revisit before the first
+  the report? Case by case for now (ADR-004 §9); revisit before the first
   public build.
-- ~~Generation access~~ decided 2026-09-20: step 2 (lava planet) is
-  generated by hand in the Gemini app (included in Google AI Pro) to prove
-  the loop; API billing is enabled before sprint step 5 (the M2 batch),
-  after which Claude generates. No standing spend cap; Claude asks before
-  every API batch with a list-price estimate.
-- Which Gemini image model becomes the house model per kind (Nano Banana 2
-  vs Pro)? Answered by the first batch's A/B; recorded here.
-- Gemini app outputs (if the manual fallback is used): confirm Gemini Apps
-  Activity is off so prompts are not used for training, and record the
-  app rather than an API model id in `source.model`.
-- Rotation sheets: keep or kill after the one-planet experiment. If kill,
+- House model: SDXL (safe, fast, well-trodden LoRA path on 10 GB) vs
+  Z-Image-Turbo (stronger prompt adherence, distilled, LoRA training
+  borderline on 10 GB) vs FLUX.2 klein 4B. Answered by the step 2 bake-off;
+  recorded here with the seeds used.
+- Gemini-app outputs as LoRA training data: allowed under Google's consumer
+  terms? Until confirmed they are assets only, not training data.
+- Gemini-app outputs as game assets: confirm the consumer terms (ownership,
+  commercial use) once and record them in the rows' `license.terms`.
+- Rotation sheets: keep or kill after the turntable experiment. If kill,
   remove the 32-angle target from `assets/README.md`.
 - Hull polycount budgets per class (player ~5k, NPC ~2k from `README.md`):
   confirm they hold under the 50-ship performance target.
-- Portrait consistency for recurring NPCs (port masters, faction envoys)
-  at M5: is reference-image editing enough, or do we need a fixed
-  character sheet per NPC?
+- Disk: checkpoints + LoRAs + datasets under `assets/source/` will reach
+  tens of GB; confirm the drive and whether they live on another one via
+  the `.env` path.
 - Encrypted PCK key management for release exports (M2+, needs export
   presets first).
 
@@ -173,10 +202,14 @@ Sheet playback speed lives in each `sheet.json` (`fps`).
 
 - `tools/validate_data.py`: manifest validates; every `assets/` file is
   covered by exactly one row; every `wired` row's `path` exists; every
-  `data/` reference to an asset resolves to a `wired` row.
+  `data/` reference to an asset resolves to a `wired` row; `dump/` and
+  `source/` are skipped.
 - The validator is exercised by a `tests/tools/` Python test with a fixture
   tree containing an orphan file and a dangling row (no sim code involved,
   so no GUT test).
+- `comfy_generate.py` is deterministic: same workflow + prompt + seed on the
+  same machine reproduces the kept candidate byte-for-byte (checked once per
+  house-model change, not in CI).
 - Sprint exit: one asset of every kind above has gone through the full
   loop and is visible in-game or audible in a test scene. Verification
   screenshots are not committed (add `tests/client/screenshots/` to

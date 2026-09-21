@@ -193,12 +193,12 @@
       "status": "wanted",
       "milestone": "sprint",
       "source": {
-        "provider": "gemini"
+        "provider": "local"
       },
       "license": {
         "status": "pending"
       },
-      "notes": "Sprint step 2: first asset through the Claude-driven loop; A/B Nano Banana 2 vs Pro to pick the house model for planets."
+      "notes": "Sprint step 2: house-model bake-off, SDXL 1.0 vs Z-Image-Turbo, 3 seeds each; the user's Gemini-app renders of the same prompt are the quality reference."
     },
     {
       "id": "merchant_mk2",
@@ -207,12 +207,12 @@
       "status": "wanted",
       "milestone": "sprint",
       "source": {
-        "provider": "gemini"
+        "provider": "local"
       },
       "license": {
         "status": "pending"
       },
-      "notes": "Sprint step 3 proof hull: Gemini concept sheet -> Hunyuan3D local -> normalize_hull.py. Mid-tier trader, boxy silhouette."
+      "notes": "Sprint step 3 proof hull: concept sheet (local; Gemini app if local cannot hold three consistent views) -> Hunyuan3D local -> normalize_hull.py. Mid-tier trader, boxy silhouette."
     },
     {
       "id": "interceptor_mk1",
@@ -221,7 +221,7 @@
       "status": "wanted",
       "milestone": "M2",
       "source": {
-        "provider": "gemini"
+        "provider": "local"
       },
       "license": {
         "status": "pending"
@@ -235,7 +235,7 @@
       "status": "wanted",
       "milestone": "M2",
       "source": {
-        "provider": "gemini"
+        "provider": "local"
       },
       "license": {
         "status": "pending"
@@ -249,7 +249,7 @@
       "status": "wanted",
       "milestone": "M2",
       "source": {
-        "provider": "gemini"
+        "provider": "local"
       },
       "license": {
         "status": "pending"
@@ -263,7 +263,7 @@
       "status": "wanted",
       "milestone": "M2",
       "source": {
-        "provider": "gemini"
+        "provider": "local"
       },
       "license": {
         "status": "pending"
@@ -276,7 +276,7 @@
       "status": "wanted",
       "milestone": "M2",
       "source": {
-        "provider": "gemini"
+        "provider": "local"
       },
       "license": {
         "status": "pending"
@@ -289,7 +289,7 @@
       "status": "wanted",
       "milestone": "M2",
       "source": {
-        "provider": "gemini"
+        "provider": "local"
       },
       "license": {
         "status": "pending"
@@ -302,7 +302,7 @@
       "status": "wanted",
       "milestone": "M2",
       "source": {
-        "provider": "gemini"
+        "provider": "local"
       },
       "license": {
         "status": "pending"
@@ -316,7 +316,7 @@
       "status": "wanted",
       "milestone": "M2",
       "source": {
-        "provider": "gemini"
+        "provider": "local"
       },
       "license": {
         "status": "pending"
@@ -329,7 +329,7 @@
       "status": "wanted",
       "milestone": "M2",
       "source": {
-        "provider": "gemini"
+        "provider": "local"
       },
       "license": {
         "status": "pending"
@@ -342,7 +342,7 @@
       "status": "wanted",
       "milestone": "M2",
       "source": {
-        "provider": "gemini"
+        "provider": "local"
       },
       "license": {
         "status": "pending"
@@ -355,7 +355,7 @@
       "status": "wanted",
       "milestone": "M2",
       "source": {
-        "provider": "gemini"
+        "provider": "local"
       },
       "license": {
         "status": "pending"
@@ -368,7 +368,7 @@
       "status": "wanted",
       "milestone": "M2",
       "source": {
-        "provider": "gemini"
+        "provider": "local"
       },
       "license": {
         "status": "pending"
@@ -381,7 +381,7 @@
       "status": "wanted",
       "milestone": "M2",
       "source": {
-        "provider": "gemini"
+        "provider": "local"
       },
       "license": {
         "status": "pending"
@@ -394,7 +394,7 @@
       "status": "wanted",
       "milestone": "M2",
       "source": {
-        "provider": "gemini"
+        "provider": "local"
       },
       "license": {
         "status": "pending"
@@ -407,12 +407,12 @@
       "status": "wanted",
       "milestone": "M2",
       "source": {
-        "provider": "gemini"
+        "provider": "gemini_app"
       },
       "license": {
         "status": "pending"
       },
-      "notes": "Bust on black, neutral expression, reads at 64px in the trade screen."
+      "notes": "Hero portrait: the user generates in the Gemini app (Nano Banana Pro). Bust on black, neutral expression, reads at 64px in the trade screen."
     },
     {
       "id": "music_safe_space",

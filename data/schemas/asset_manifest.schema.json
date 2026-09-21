@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "galactickingdom/asset_manifest.schema.json",
   "title": "Asset manifest",
-  "description": "Single source of truth for every file under assets/: what is wanted, what exists, where it came from, and under which license (ADR-004, wiki/systems/asset-pipeline.md). One row per asset; a row's path may name a file or a directory that it covers by prefix. tools/validate_data.py enforces that every file under assets/ (except dump/, *.import, *.md, .gitkeep) is covered by exactly one wired row.",
+  "description": "Single source of truth for every file under assets/: what is wanted, what exists, where it came from, and under which license (ADR-004, wiki/systems/asset-pipeline.md). One row per asset; a row's path may name a file or a directory that it covers by prefix. tools/validate_data.py enforces that every file under assets/ (except dump/, source/, *.import, *.md, .gitkeep) is covered by exactly one wired row.",
   "type": "object",
   "required": ["assets"],
   "additionalProperties": false,
@@ -44,12 +44,12 @@
           "required": ["provider"],
           "additionalProperties": false,
           "properties": {
-            "provider": { "enum": ["gemini", "hunyuan3d", "envato", "recraft", "user", "pack", "derived"] },
-            "model": { "type": "string", "description": "Generator model id (Gemini model name such as gemini-3.1-flash-image) or tool version." },
+            "provider": { "enum": ["local", "gemini_app", "hunyuan3d", "envato", "recraft", "user", "pack", "derived"], "description": "local: ComfyUI on the reference machine. gemini_app: the user, by hand, in the Gemini app (Google AI Pro). No pay-per-use API provider exists by design (ADR-004)." },
+            "model": { "type": "string", "description": "Checkpoint plus LoRA as named in tools/gen/models.json (e.g. 'sdxl-base-1.0 + gk_style_v1'), the Gemini app model name, or a tool version." },
+            "workflow": { "type": "string", "pattern": "^tools/gen/workflows/[a-z0-9_]+\\.json$", "description": "local rows: the ComfyUI workflow that produced the asset." },
             "prompt": { "type": "string", "description": "Full prompt including the style block, or the search that found an Envato item." },
             "seed": { "type": "integer" },
-            "job_id": { "type": "string", "description": "Provider job/operation id where one exists (Veo operations)." },
-            "date": { "type": "string", "format": "date" },
+                        "date": { "type": "string", "format": "date" },
             "parent_id": { "type": "string", "pattern": "^[a-z0-9_]+$", "description": "derived rows: the manifest id this was cut or extracted from." },
             "original_filename": { "type": "string" },
             "item_url": { "type": "string", "format": "uri" }
@@ -64,11 +64,10 @@
               "enum": ["verified", "unknown", "pending"],
               "description": "verified: terms read and recorded. pending: provider known, terms not yet confirmed. unknown: provenance itself is unknown."
             },
-            "terms": { "type": "string", "description": "One line, e.g. 'Gemini API paid tier: outputs owned, no training, SynthID' or 'CC0'." },
+            "terms": { "type": "string", "description": "One line, e.g. 'SDXL OpenRAIL++-M, outputs unrestricted', 'Z-Image-Turbo Apache 2.0', or 'CC0'." },
             "registered_project": { "type": "string", "description": "Envato only: the project the download was registered to." }
           }
         },
-        "cost_usd": { "type": "number", "minimum": 0, "description": "List-price cost of every generation the row consumed, candidates included." },
         "notes": { "type": "string" }
       },
       "allOf": [
@@ -92,6 +91,15 @@
         {
           "if": { "properties": { "source": { "properties": { "provider": { "const": "derived" } }, "required": ["provider"] } } },
           "then": { "properties": { "source": { "required": ["parent_id"] } } }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": { "const": "wired" },
+              "source": { "properties": { "provider": { "const": "local" } }, "required": ["provider"] }
+            }
+          },
+          "then": { "properties": { "source": { "required": ["model", "workflow", "prompt", "seed"] } } }
         }
       ]
     }

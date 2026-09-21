@@ -14,8 +14,8 @@ Conventions:
                                sprite_dir must hold sheet.png + sheet.json)
 - data/assets/manifest.json -> data/schemas/asset_manifest.schema.json; ids unique; every
                                wired row's path exists; every file under assets/ (except
-                               dump/, *.import, *.md, .gitkeep) is covered by exactly one
-                               wired row; every asset path referenced from data/ is covered
+                               dump/, source/, *.import, *.md, .gitkeep) is covered by
+                               exactly one wired row; every asset path referenced from data/ is covered
                                by a wired row (ADR-004, wiki/systems/asset-pipeline.md)
 """
 
@@ -37,8 +37,9 @@ DATA_DIR = REPO_ROOT / "data"
 SCHEMAS_DIR = DATA_DIR / "schemas"
 
 RES_PREFIX = "res://"
-# Files under assets/ that carry no art and need no manifest row.
-COVERAGE_EXCLUDED_DIRS = {"dump"}
+# Files under assets/ that carry no shipped art and need no manifest row:
+# dump/ is staging, source/ holds working files, checkpoints, LoRAs, datasets.
+COVERAGE_EXCLUDED_DIRS = {"dump", "source"}
 COVERAGE_EXCLUDED_SUFFIXES = {".import", ".md"}
 COVERAGE_EXCLUDED_NAMES = {".gitkeep"}
 

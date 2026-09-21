@@ -17,3 +17,6 @@ __pycache__/
 # the manifest row is the record, the kept file lands under assets/<kind>/
 assets/dump/gen/
 assets/dump/envato/
+
+# Local model checkpoints, LoRAs, training sets (tools/gen/models.json is the record)
+assets/source/

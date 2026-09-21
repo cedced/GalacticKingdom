@@ -1,7 +1,8 @@
 # ADR-004: Asset sourcing and generation policy
 
-Status: Proposed (accept once sprint step 3 proves the local image-to-3D
-pipeline on the reference machine)
+Status: Proposed (accept once sprint step 2 has picked the local house
+model and step 3 proves the local image-to-3D pipeline on the reference
+machine)
 
 ## Context
 
@@ -15,68 +16,86 @@ answer for ships, VFX, UI icons, portraits, or audio, and provenance lived
 in per-folder markdown tables that nothing checked.
 
 Decided 2026-09-20 in a planning session (the question round is summarized
-in `wiki/systems/asset-pipeline.md`). Revised the same day: the first draft
-named Higgsfield as the generator; the user pointed out that Higgsfield's
-image models are Google's Nano Banana resold with a credit markup and that
-they already pay for Google AI Pro, so the generator became Google direct
-and Higgsfield was dropped.
+in `wiki/systems/asset-pipeline.md`), revised twice: the first draft named
+Higgsfield as the generator (it resells Google's models); the second named
+the Gemini API. On 2026-09-21 the user ruled out every pay-per-use API:
+generation uses only what is already paid for (Google AI Pro, Envato
+Elements) and local open-weight models on the reference machine (RTX 3080
+10 GB, 32 GB RAM) that we can fine-tune on our own assets.
 
 ## Decision
 
-1. **Google Gemini image models (Nano Banana) generate everything bespoke
-   to our fiction**, and Veo generates the short clips that become VFX and
-   rotation sheets. Ships (concept sheets), planets, suns, stations,
-   derelicts, icons, and portraits are generated against the locked style
-   block in `assets/ART_WORKFLOW.md`. On the paid Gemini API, Google does
-   not train on prompts or outputs and outputs are the user's to use
-   commercially (invisible SynthID watermark, irrelevant for sprites).
-2. **Envato Elements supplies non-diegetic material and audio**: music,
-   sound effects, stock VFX footage as raw material, textures/HDRIs, fonts,
-   UI kits. No Envato ship, station, or planet enters `assets/` — style
-   drift is the reason. Every download is registered to the Envato project
-   "GalacticKingdom".
-3. **Ships stay 3D (ADR-003 holds).** Hull geometry comes from
-   **Hunyuan3D running locally** (RTX 3080 10 GB) on a Gemini concept
-   sheet, then a Blender normalization pass, then GLB. No cloud image-to-3D
-   service. Background removal is also local (`rembg`).
-4. **Claude generates, the human curates.** Claude runs generation from
-   `tools/gen/` scripts against the Gemini API, drops candidates in
-   `assets/dump/gen/<manifest_id>/`, and the user approves before intake.
-   Access requires an AI Studio API key with billing (`GEMINI_API_KEY` in
-   `.env`, never committed); the Google AI Pro subscription alone does not
-   provide API access. Sprint step 2 runs by hand in the Gemini app (the
-   user generates, Claude intakes) to prove the loop; billing is enabled
-   before the M2 batch. No standing spend cap: Claude estimates each API
-   batch from list prices and asks before running it.
-5. **`data/assets/manifest.json` is the single source of truth** for every
-   asset: wanted or present, provenance, prompt, model, seed, license, cost.
-   It is schema-validated and CI fails when a file under `assets/` has no
-   manifest row. It replaced the per-folder `SOURCES.md` tables.
-6. **License posture is case by case.** Unknown-license placeholders are
-   replaced when a new asset is both licensed and better, not on a
-   deadline. Release exports print a license report; whether they should
-   fail on unknown rows is an open question in the pipeline page.
-7. **Cadence**: one asset sprint between M1 and M2 (tooling, ship pipeline
-   proof, M2 batch), then every milestone plan carries its own asset rows.
+1. **Local open-weight diffusion models generate everything bespoke to our
+   fiction**, driven by Claude through ComfyUI's HTTP API from `tools/gen/`.
+   Candidates with commercial-safe licenses that fit the card: SDXL 1.0
+   (OpenRAIL++-M), Z-Image-Turbo (Apache 2.0), FLUX.2 klein 4B (Apache 2.0).
+   Sprint step 2 picks the house model by a bake-off on the lava planet.
+   Every generation records model, LoRA, workflow, prompt, and seed, so any
+   asset can be regenerated exactly.
+2. **The house style is a LoRA trained on our own approved assets.** The
+   dataset is built from manifest rows (`status: wired`, the row's prompt is
+   the caption); training config and the resulting weights' hash live in
+   `tools/gen/models.json`; weights themselves stay out of git
+   (`assets/source/`, gitignored, excluded from exports). Retrain when the
+   approved set grows by a milestone's worth of assets.
+3. **The Gemini app (Google AI Pro) is the manual channel for hero pieces**
+   where the local model falls short: ship concept sheets, portraits,
+   marketing. The user generates and drops PNGs in `dump/gen/<id>/`; Claude
+   intakes. No Gemini API key, no billing, ever, under this ADR.
+4. **Envato Elements supplies non-diegetic material and audio**: music,
+   sound effects, stock footage as raw material, textures/HDRIs, fonts, UI
+   kits. No Envato ship, station, or planet enters `assets/` (style drift).
+   Every download is registered to the Envato project "GalacticKingdom".
+5. **Ships stay 3D (ADR-003 holds).** Hull geometry comes from Hunyuan3D
+   running locally on a concept sheet, then a Blender normalization pass,
+   then GLB. Background removal is local (`rembg`).
+6. **No generated video.** VFX are Godot GPU particles and shaders first
+   (M3); a sprite sheet is made only where a shader cannot do it, from a
+   local video model or a Blender simulation. Rotation sheets, if the
+   experiment says they are worth it, are Blender turntable renders of a
+   generated equirectangular texture, not extracted video frames.
+7. **Claude generates, the human curates.** Claude runs local batches,
+   drops candidates in `assets/dump/gen/<manifest_id>/`, and the user
+   approves before intake. The only budget is GPU time; Claude states the
+   expected wall-clock before a batch longer than about an hour.
+8. **`data/assets/manifest.json` is the single source of truth** for every
+   asset: wanted or present, provenance, prompt, model, seed, license. It is
+   schema-validated and CI fails when a file under `assets/` has no manifest
+   row. It replaced the per-folder `SOURCES.md` tables.
+9. **License posture is case by case.** Unknown-license placeholders are
+   replaced when a new asset is both licensed and better, not on a deadline.
+   Release exports print a license report; whether they should fail on
+   unknown rows is an open question in the pipeline page.
+10. **Cadence**: one asset sprint between M1 and M2 (tooling, local runtime,
+    ship pipeline proof, M2 batch, first LoRA), then every milestone plan
+    carries its own asset rows.
 
 ## Consequences
 
-- `assets/ART_WORKFLOW.md` describes what Claude does and what the user
-  approves, with Gemini model ids and the manual-app fallback.
+- `assets/ART_WORKFLOW.md` describes the local loop, the manual Gemini-app
+  channel, and the LoRA retraining routine.
 - `data/assets/` with schema, plus an assets check in
   `tools/validate_data.py` and a fixture test in `tests/tools/` (landed
-  2026-09-20 as sprint step 1).
-- `tools/gen/` holds thin Python wrappers over the `google-genai` SDK
-  (image, video) that read a manifest row, write candidates to `dump/gen/`,
-  and print the manifest patch (model, prompt, date, cost). Gemini image
-  models expose no seed, so reproducibility is prompt + model + date + the
-  kept file, not a seed.
+  2026-09-20 as sprint step 1). `assets/source/` joins `dump/` as a folder
+  the coverage check skips.
+- A ComfyUI install outside the repo (path in `.env`), model weights under
+  `assets/source/models/`, LoRAs under `assets/source/loras/`; all
+  gitignored. `tools/gen/models.json` records every checkpoint and LoRA
+  with license and sha256 so a fresh machine can be rebuilt.
+- `tools/gen/`: `comfy_generate.py` (row in, candidates out, manifest patch
+  printed), `build_dataset.py` (approved rows to a captioned training set),
+  `train_lora.py` (wrapper over kohya-ss or ai-toolkit), plus the workflow
+  JSON files ComfyUI runs. Workflows are data, checked into the repo.
 - Ships need `tools/normalize_hull.py` (Blender 5.2 headless) and a local
   Hunyuan3D install; the 10 GB card may need low-VRAM mode for the texture
   stage, which step 3 has to prove.
-- VFX and rotation sheets need `tools/frames_from_clip.py` (Python with a
-  bundled ffmpeg); the bodies pipeline's "N-angle sheets" open question gets
-  a real experiment instead of a blocker.
+- Rotation sheets, if kept, need `tools/render_turntable.py` (Blender
+  headless: sphere + equirectangular texture, N angles, fixed light).
 - Envato's "not extractable from the end product" clause means release
   export presets use Godot's encrypted PCK once export presets exist (M2+).
-- No Higgsfield account, MCP, or credits; `.mcp.json` entry removed.
+- Generation is slower than an API (seconds to a minute per image, an hour
+  or more per LoRA) and the machine is busy while it runs; batches are
+  scheduled, not interactive.
+- Gemini-app outputs are used as game assets, not as LoRA training data,
+  until Google's consumer terms on training other models with outputs are
+  confirmed (open question).
